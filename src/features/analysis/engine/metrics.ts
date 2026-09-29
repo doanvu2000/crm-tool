@@ -1,0 +1,29 @@
+import { THRESHOLDS } from '../model/thresholds';
+import type { BaseMetrics, SkuInput } from '../model/types';
+
+/** Selling Days = số ngày của kỳ trừ ngày OOS, nên ADS đã loại ảnh hưởng thiếu hàng. */
+export function computeBaseMetrics(r: SkuInput, periodDays: number): BaseMetrics {
+  const days = r.days > 0 ? r.days : periodDays;
+  const oosDays = Math.min(Math.max(r.oosDays, 0), days);
+  const sellingDays = days - oosDays;
+  const ads = sellingDays > 0 ? r.units / sellingDays : 0;
+  const oosRate = days > 0 ? oosDays / days : 0;
+  const expectedDemand = ads * days;
+  // Severe OOS: số bán thực không phản ánh nhu cầu, so kỳ trước bằng nhu cầu dự kiến.
+  const demandBase = oosRate > THRESHOLDS.oos.critical ? expectedDemand : r.units;
+  const growth = r.unitsPrev > 0 ? (demandBase - r.unitsPrev) / r.unitsPrev : null;
+  const dos = ads > 0 ? r.stock / ads : r.stock > 0 ? Infinity : null;
+  return { days, sellingDays, ads, oosRate, expectedDemand, growth, dos };
+}
+
+/** ADS trung bình theo ngành hàng, mẫu số của ADS Index. */
+export function categoryAverageAds(rows: { category: string; ads: number }[]): Map<string, number> {
+  const acc = new Map<string, { sum: number; n: number }>();
+  for (const r of rows) {
+    const a = acc.get(r.category) ?? { sum: 0, n: 0 };
+    a.sum += r.ads;
+    a.n += 1;
+    acc.set(r.category, a);
+  }
+  return new Map([...acc].map(([k, v]) => [k, v.sum / v.n]));
+}
