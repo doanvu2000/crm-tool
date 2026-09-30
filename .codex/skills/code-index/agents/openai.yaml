@@ -1,0 +1,4 @@
+interface:
+  display_name: Code index
+  short_description: Keep the architecture map synchronized with project changes
+  default_prompt: Update the project while keeping .code_index accurate and complete.
