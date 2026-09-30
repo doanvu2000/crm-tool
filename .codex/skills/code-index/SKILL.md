@@ -18,6 +18,8 @@ Read the existing index in this order:
 3. The relevant feature document in `.code_index/features/`
 4. Relevant graph/design documents when the change affects dependencies, data flow, or UI
 
+For any UI change, also use the `ui-ux-pro-max` skill at `C:\Users\dungn\.codex\skills\ui-ux-pro-max\SKILL.md` and read `.code_index/design.md` before making design decisions. Treat the existing web style as the source of truth: reuse its tokens, typography, spacing, layout, dark-mode behavior, component patterns, and interaction patterns. Do not introduce a new visual direction unless the user explicitly requests a redesign.
+
 Use the index to locate the correct feature boundary and existing public API. Preserve the architecture rules documented there:
 
 - `pages` → `features/*` → `features/analysis` → `shared`.
@@ -43,6 +45,8 @@ Use this routing table:
 | Change build/deploy behavior | `features/deploy.md` and `overview.md` |
 
 If the code change has no architectural/index impact, verify that conclusion and leave the index untouched. Update the `Cập nhật lần cuối` date in `.code_index/README.md` when index content changes, using the current project date.
+
+For UI changes, ensure the implementation remains visually consistent with the existing web and that the `ui-ux-pro-max` guidance covers responsive behavior, accessibility, focus/keyboard interaction, and loading/error states.
 
 ## Verification
 

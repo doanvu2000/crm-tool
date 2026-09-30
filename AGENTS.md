@@ -12,6 +12,7 @@ Trước khi sửa code:
 1. Đọc `.code_index/README.md`.
 2. Đọc `.code_index/overview.md`.
 3. Đọc file feature/graph/design liên quan đến phần sắp sửa.
+4. Nếu thay đổi UI, bắt buộc dùng skill `ui-ux-pro-max` tại `C:\Users\dungn\.codex\skills\ui-ux-pro-max\SKILL.md` và đọc `.code_index/design.md`.
 
 Sau khi sửa code:
 
@@ -34,6 +35,8 @@ Sau khi sửa code:
 - Chart dùng `ChartCanvas` và config `computed` theo `usePalette()`; không gọi `new Chart` trực tiếp trong component.
 - Mảng dữ liệu lớn dùng `shallowRef`/`markRaw`, không deep reactive. Bảng phải phân trang.
 - Text UI bằng tiếng Việt, không dùng ký tự em dash.
+- Mọi thay đổi UI phải tuân thủ đúng style hiện tại của web: kế thừa token màu, typography, spacing, layout, dark mode, component pattern và interaction pattern đã có; không tự ý tạo design system hoặc phong cách mới.
+- Với thay đổi UI, ưu tiên chỉnh sửa component/token hiện có trước khi thêm pattern mới; kiểm tra responsive, accessibility, focus/keyboard và trạng thái loading/error.
 
 ## Kiểm tra trước khi push
 
