@@ -6,7 +6,7 @@ Trái tim nghiệp vụ. Engine thuần TS + Pinia store. Public API: `features/
 
 | File | Trách nhiệm |
 |---|---|
-| `model/types.ts` | Hằng thứ tự (`ABC_CLASSES`, `VELOCITY_LEVELS`, `DOS_LEVELS`, `OOS_LEVELS`, `TREND_LEVELS`, `ACTION_GROUPS`, `LIFECYCLES`) + type `SkuInput`, `AnalysisSettings`, `BaseMetrics`, `AbcAssignment`, `Classification`, `ActionDecision`, `SkuContext`, `SkuResult` |
+| `model/types.ts` | Hằng thứ tự (`ABC_CLASSES`, `VELOCITY_LEVELS`, `DOS_LEVELS`, `OOS_LEVELS`, `TREND_LEVELS`, `ACTION_GROUPS`, `LIFECYCLES`) + type `SkuInput` (có `category`, `subcat1?`, `subcat2?`), `AnalysisSettings`, `BaseMetrics`, `AbcAssignment`, `Classification`, `ActionDecision`, `SkuContext`, `SkuResult` |
 | `model/actionRules.ts` | `ACTION_RULES` (id, stage, when, group, action) theo đúng thứ tự xét, `ActionRuleId`, `ACTION_RULE_BY_ID`. `decideAction` lấy group/action từ đây nên bảng Quy tắc luôn khớp engine |
 | `model/thresholds.ts` | `THRESHOLDS` (mọi ngưỡng Pilot), `DEFAULT_SETTINGS` ABC CVS (56 ngày, A 70%, B 90%), `sanitizeSettings` |
 | `engine/metrics.ts` | `computeBaseMetrics`, `comparePrevious`, `categoryAverageAds` |
@@ -16,7 +16,7 @@ Trái tim nghiệp vụ. Engine thuần TS + Pinia store. Public API: `features/
 | `engine/analyze.ts` | `analyzeSkus` pipeline |
 | `engine/aggregate.ts` | `countBy`, `sumBy` |
 | `engine/analyze.test.ts` | Vitest cho biên ngưỡng, ABC, Severe OOS, EOL, Core, Overstock và lọc đa ngành / tổng tất cả ngành |
-| `store/analysisStore.ts` | `useAnalysisStore` (state: raw, original, removed (Set index đã xoá), sourceLabel, settings, selectedCategories, actionFilter; drill; getters: activeRaw (raw bỏ removed, đầu vào của analyzeSkus), rows, categoryRows, visibleRows, crossRows, matrixRows, hasDrill, editedIndexes (sửa hoặc xoá), editedCount, removedCount, baselineRows; actions: setData, restoreSavedData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategories, toggleCategory, selectAllCategories, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill). Mảng `selectedCategories` rỗng nghĩa là tổng tất cả ngành; `actionFilter` là computed get/set trên `drill.group`; thay đổi dữ liệu và settings được lưu cục bộ |
+| `store/analysisStore.ts` | `useAnalysisStore` (state: raw, original, removed, sourceLabel, settings, selectedCategories, selectedSubcat1, selectedSubcat2, actionFilter; drill; getters: activeRaw, rows, categoryRows (lọc theo 3 cấp ngành hàng), visibleRows, crossRows, matrixRows, hasDrill, editedIndexes, editedCount, removedCount, baselineRows; actions: setData, restoreSavedData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategories, setSubcat1, setSubcat2, toggleCategory, selectAllCategories, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill). `selectedCategories` rỗng nghĩa là tổng tất cả ngành; thay đổi dữ liệu và settings được lưu cục bộ |
 | `store/analysisPersistence.ts` | Lưu và đọc bản phân tích gần nhất từ IndexedDB trên trình duyệt, gồm dữ liệu gốc, sửa/xoá, nhãn nguồn và settings |
 
 ## Rules (theo `Nguyên tắc xây  dựng Analysis.md`, kèm cách hiểu đã chốt)

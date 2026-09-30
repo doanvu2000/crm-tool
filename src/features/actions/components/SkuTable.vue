@@ -33,6 +33,7 @@ const COLUMNS: { key: SortKey; label: string; num?: boolean }[] = [
 const ariaSort = (key: SortKey) => (sortKey.value !== key ? 'none' : sortDir.value === 1 ? 'ascending' : 'descending');
 const abcColor = (r: SkuResult) => palette.value.abc[ABC_CLASSES.indexOf(r.abc)];
 const actionColor = (r: SkuResult) => palette.value.action[ACTION_GROUPS.indexOf(r.group)];
+const categoryPath = (r: Pick<SkuResult, 'category' | 'subcat1' | 'subcat2'>) => [r.category, r.subcat1, r.subcat2].filter(Boolean).join(' / ');
 
 const pageInfo = computed(() => {
   const total = filtered.value.length;
@@ -95,7 +96,7 @@ const sub = 'text-xs text-ink-3';
               <span v-if="r.isCore" class="pill bg-tag! text-tag-ink!">Core</span>
               <span class="pill"><ColorDot :color="abcColor(r)" />{{ r.abc }}</span>
             </div>
-            <div class="mt-0.5 truncate text-xs text-ink-3">{{ r.name }} · {{ r.category }}</div>
+            <div class="mt-0.5 truncate text-xs text-ink-3" :title="categoryPath(r)">{{ r.name }} · {{ categoryPath(r) }}</div>
           </div>
           <span class="num flex-none text-right text-sm text-ink-2">{{ money(r.revenue) }}<span class="block text-xs text-ink-3">{{ signedPct(r.revenueGrowth, 0) }} kỳ trước</span></span>
         </div>
@@ -141,7 +142,7 @@ const sub = 'text-xs text-ink-3';
                 <button type="button" class="num -mx-1 rounded px-1 font-medium text-ink underline decoration-line decoration-2 underline-offset-4 hover:decoration-ink-3" :aria-label="`Xem cách tính ${r.sku}`" @click="traced = r">{{ r.sku }}</button>
                 <span v-if="r.isCore" class="pill bg-tag! text-tag-ink!">Core</span>
               </div>
-              <div :class="sub">{{ r.name }}<template v-if="r.name"> · </template>{{ r.category }}</div>
+              <div :class="sub" :title="categoryPath(r)">{{ r.name }}<template v-if="r.name"> · </template>{{ categoryPath(r) }}</div>
             </td>
             <td :class="cell"><span class="pill"><ColorDot :color="abcColor(r)" />{{ r.abc }}</span></td>
             <td :class="numCell" :title="`Kỳ trước ${money(r.prevRevenue)}${r.prevRevenueEstimated ? ' (ước tính)' : ''}`">{{ money(r.revenue) }}<div :class="[sub, 'font-sans']">{{ signedPct(r.revenueGrowth, 0) }} kỳ trước</div></td>

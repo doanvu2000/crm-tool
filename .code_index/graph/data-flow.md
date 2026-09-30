@@ -4,14 +4,14 @@
 File .csv/.xlsx ─┐
                  ├─ import/lib/readSheet.ts (SheetJS lazy) → Record<string, unknown>[]
 Dữ liệu mẫu ─────┤─ import/lib/sampleData.ts
-                 └─ import/lib/mapRows.ts (alias cột, parseNum VN/EN) → SkuInput[]
+                 └─ import/lib/mapRows.ts (alias cột, parseNum VN/EN) → SkuInput[] (category + subcat1 + subcat2)
                         │
                         ▼
         analysis/store/analysisStore.ts  (Pinia)
-          state:   raw (shallowRef), original (bản file gốc), removed (Set index), settings, selectedCategories, sourceLabel
-          actions: setData, restoreSavedData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings (sanitizeSettings), setCategories/toggleCategory/selectAllCategories
+          state:   raw (shallowRef), original (bản file gốc), removed (Set index), settings, selectedCategories, selectedSubcat1/2, sourceLabel
+          actions: setData, restoreSavedData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings (sanitizeSettings), setCategories/setSubcat1/setSubcat2/toggleCategory/selectAllCategories
           getters: rows = analyzeSkus(raw, settings)   ← cache theo raw + settings
-                   categoryRows = rows lọc theo selectedCategories (mảng rỗng = tổng tất cả ngành)
+                   categoryRows = rows lọc theo category + selectedSubcat1 + selectedSubcat2
                    visibleRows = categoryRows lọc theo drill (lọc chéo)
                    crossRows[field] / matrixRows = bỏ drill của chính chart đó
                    categories, hasData
@@ -45,4 +45,5 @@ Khi nạp dữ liệu hoặc sửa/xoá dòng, store lưu bản phân tích gầ
 - Settings: chuẩn ABC CVS cố định (Sales, 56 ngày, 70/90); chọn basis tốc độ bán → `updateSettings` → store recompute rows.
 - Xuất CSV: `actions/lib/exportCsv.ts` lấy danh sách đã lọc của bảng → `shared/lib/download.ts` (BOM UTF-8).
 - Sửa input: `editor/components/CellInput.vue` giữ draft, commit sau 300ms / blur / Enter → `store.updateRow` → rows recompute → mọi section cập nhật. Sửa về đúng giá trị gốc thì dòng trở lại object gốc (không còn tính là đã sửa).
+- Ngành hàng: Import map `category`, `subcat1`, `subcat2` vào `SkuInput`; `CategoryFilter` cung cấp ba select phân cấp, store lọc `categoryRows`, rồi toàn bộ KPI/chart/bảng dùng tập SKU đó. File cũ có thể bỏ trống hai cột Subcat.
 - Tour: `onboarding/composables/useTour.ts` (state module-level, localStorage `sku-tour` {intro, data}). `TourOverlay` tự chạy intro khi chưa có dữ liệu, tự chạy phase data khi `hasData` lần đầu. Điểm neo = attribute `data-tour="<tên>"`.

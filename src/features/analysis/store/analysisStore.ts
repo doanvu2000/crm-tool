@@ -28,6 +28,8 @@ export const useAnalysisStore = defineStore('analysis', () => {
   // Mảng rỗng nghĩa là tổng tất cả ngành hàng. Mảng nhỏ này chỉ phục vụ UI
   // filter nên có thể reactive bình thường; dữ liệu SKU vẫn giữ shallowRef.
   const selectedCategories = ref<string[]>([]);
+  const selectedSubcat1 = ref('');
+  const selectedSubcat2 = ref('');
   const drill = ref<DrillFilter>({});
   const actionFilter = computed<ActionGroup | 'all'>({
     get: () => (drill.value.group as ActionGroup | undefined) ?? 'all',
@@ -40,11 +42,16 @@ export const useAnalysisStore = defineStore('analysis', () => {
   const rows = computed<readonly SkuResult[]>(() => markRaw(analyzeSkus(activeRaw.value, settings.value)));
   const hasData = computed(() => raw.value.length > 0);
   const categories = computed(() => [...new Set(rows.value.map((r) => r.category))].sort((a, b) => a.localeCompare(b, 'vi')));
-  const categoryRows = computed<readonly SkuResult[]>(() =>
-    selectedCategories.value.length === 0
+  const categoryRows = computed<readonly SkuResult[]>(() => {
+    if (selectedCategories.value.length === 0 && !selectedSubcat1.value && !selectedSubcat2.value) return rows.value;
+    const scoped = selectedCategories.value.length === 0
       ? rows.value
-      : markRaw(rows.value.filter((r) => selectedCategories.value.includes(r.category)))
-  );
+      : rows.value.filter((r) => selectedCategories.value.includes(r.category));
+    return markRaw(scoped.filter((r) =>
+      (!selectedSubcat1.value || r.subcat1 === selectedSubcat1.value) &&
+      (!selectedSubcat2.value || r.subcat2 === selectedSubcat2.value)
+    ));
+  });
 
   const applyDrill = (list: readonly SkuResult[], skip: readonly DrillField[]) => {
     const active = (Object.entries(drill.value) as [DrillField, string][]).filter(([f]) => !skip.includes(f));
@@ -115,6 +122,8 @@ export const useAnalysisStore = defineStore('analysis', () => {
     removed.value = new Set();
     sourceLabel.value = label;
     selectedCategories.value = [];
+    selectedSubcat1.value = '';
+    selectedSubcat2.value = '';
     drill.value = {};
     persistData();
   }
@@ -124,7 +133,9 @@ export const useAnalysisStore = defineStore('analysis', () => {
     if (!current) return;
     const next = { ...current, ...patch };
     const base = original.value[index];
-    const same = (Object.keys(next) as (keyof SkuInput)[]).every((k) => next[k] === base[k]);
+    const same = (Object.keys(next) as (keyof SkuInput)[]).every((k) =>
+      next[k] === base[k] || ((k === 'subcat1' || k === 'subcat2') && !next[k] && !base[k])
+    );
     const copy = raw.value.slice();
     copy[index] = same ? base : next;
     raw.value = markRaw(copy);
@@ -168,6 +179,17 @@ export const useAnalysisStore = defineStore('analysis', () => {
   function setCategories(next: readonly string[]) {
     const valid = new Set(categories.value);
     selectedCategories.value = [...new Set(next)].filter((category) => valid.has(category));
+    selectedSubcat1.value = '';
+    selectedSubcat2.value = '';
+  }
+
+  function setSubcat1(value: string) {
+    selectedSubcat1.value = value;
+    selectedSubcat2.value = '';
+  }
+
+  function setSubcat2(value: string) {
+    selectedSubcat2.value = value;
   }
 
   function toggleCategory(category: string) {
@@ -178,7 +200,7 @@ export const useAnalysisStore = defineStore('analysis', () => {
   }
 
   function selectAllCategories() {
-    selectedCategories.value = [];
+    setCategories([]);
   }
 
   function setActionFilter(next: ActionGroup | 'all') {
@@ -211,8 +233,8 @@ export const useAnalysisStore = defineStore('analysis', () => {
   }
 
   return {
-    raw, original, removed, activeRaw, sourceLabel, settings, selectedCategories, actionFilter, drill,
+    raw, original, removed, activeRaw, sourceLabel, settings, selectedCategories, selectedSubcat1, selectedSubcat2, actionFilter, drill,
     rows, hasData, categories, categoryRows, visibleRows, crossRows, matrixRows, hasDrill, editedIndexes, editedCount, removedCount, baselineRows,
-    setData, restoreSavedData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategories, toggleCategory, selectAllCategories, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill
+    setData, restoreSavedData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategories, setSubcat1, setSubcat2, toggleCategory, selectAllCategories, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill
   };
 });

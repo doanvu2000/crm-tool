@@ -13,6 +13,8 @@ export interface EditColumn {
 export const EDIT_COLUMNS: EditColumn[] = [
   { key: 'name', label: 'Tên', kind: 'text', width: 'min-w-44' },
   { key: 'category', label: 'Ngành', kind: 'text', width: 'min-w-32' },
+  { key: 'subcat1', label: 'Subcat 1', kind: 'text', width: 'min-w-32' },
+  { key: 'subcat2', label: 'Subcat 2', kind: 'text', width: 'min-w-32' },
   { key: 'revenue', label: 'Doanh thu', kind: 'number', width: 'min-w-32' },
   { key: 'revenuePrev', label: 'DT kỳ trước', kind: 'number', width: 'min-w-32' },
   { key: 'gp', label: 'GP', kind: 'number', width: 'min-w-28' },
@@ -26,7 +28,7 @@ export const EDIT_COLUMNS: EditColumn[] = [
 ];
 
 export const EDIT_GROUPS: { title: string; keys: (keyof SkuInput)[] }[] = [
-  { title: 'Thông tin', keys: ['name', 'category', 'lifecycle', 'seasonal'] },
+  { title: 'Thông tin', keys: ['name', 'category', 'subcat1', 'subcat2', 'lifecycle', 'seasonal'] },
   { title: 'Kỳ này', keys: ['revenue', 'gp', 'units', 'oosDays', 'stock', 'days'] },
   { title: 'Kỳ trước', keys: ['revenuePrev', 'unitsPrev'] }
 ];

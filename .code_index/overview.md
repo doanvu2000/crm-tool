@@ -37,9 +37,9 @@ src/
 │   └── SkuAnalysisPage.vue
 ├── features/               feature-first, mỗi feature có index.ts (public API)
 │   ├── analysis/           DOMAIN: types, thresholds, engine thuần, Pinia store
-│   ├── import/             đọc file, map cột, dữ liệu mẫu, file mẫu CSV
+│   ├── import/             đọc file, map cột ngành hàng/Subcat 1/2, dữ liệu mẫu, file mẫu CSV
 │   ├── settings/           chuẩn ABC CVS (Sales, rolling 8 tuần, 70/90 theo ngành) + basis bổ sung cho business rule
-│   ├── overview/           lọc ngành + KPI tiles + so với kỳ trước (PeriodCompare)
+│   ├── overview/           lọc phân cấp ngành hàng → Subcat 1/2 + KPI tiles + so với kỳ trước
 │   ├── contribution/       Pareto, cơ cấu ABC, ma trận ABC x Velocity, Exception
 │   ├── inventory/          phân bố Velocity/DOS/OOS/Trend + scatter DOS x Growth
 │   ├── actions/            phân bổ Action + bảng SKU (lọc/sort/trang/xuất CSV)

@@ -35,7 +35,7 @@ export const TOUR_STEPS: Record<TourPhase, TourStep[]> = {
     {
       target: 'category',
       title: 'Lọc theo ngành hàng',
-      body: 'Chọn 1 ngành, mọi số liệu và chart bên dưới chỉ tính ngành đó. Bấm 1 cột trên chart (vd Strong Growth) hoặc 1 ô ma trận cũng lọc toàn trang; bộ lọc hiện ở thanh Đang lọc phía trên.'
+      body: 'Chọn lần lượt Ngành hàng, Subcat 1 và Subcat 2 để thu hẹp dữ liệu. Chart và bảng cập nhật theo phạm vi đã chọn. Bấm một cột trên chart hoặc một ô ma trận để lọc thêm; bộ lọc hiện ở thanh Đang lọc phía trên.'
     },
     {
       target: 'compare',

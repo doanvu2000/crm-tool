@@ -8,11 +8,18 @@ const store = useAnalysisStore();
 
 const chips = computed(() => (Object.entries(store.drill) as [DrillField, string][]).map(([field, value]) => ({ field, label: DRILL_LABEL[field], value })));
 const categoryLabel = computed(() => {
-  if (!store.selectedCategories.length) return 'Tổng tất cả ngành';
-  if (store.selectedCategories.length === 1) return store.selectedCategories[0];
-  return `${store.selectedCategories.length} ngành hàng`;
+  const category = !store.selectedCategories.length
+    ? 'Tổng tất cả ngành'
+    : store.selectedCategories.length === 1
+      ? store.selectedCategories[0]
+      : `${store.selectedCategories.length} ngành hàng`;
+  return [category, store.selectedSubcat1, store.selectedSubcat2].filter(Boolean).join(' · ');
 });
-const categoryTitle = computed(() => store.selectedCategories.length ? store.selectedCategories.join(', ') : 'Tổng tất cả ngành hàng');
+const categoryTitle = computed(() => [
+  store.selectedCategories.length ? store.selectedCategories.join(', ') : 'Tổng tất cả ngành hàng',
+  store.selectedSubcat1,
+  store.selectedSubcat2
+].filter(Boolean).join(' · '));
 function clearAll() {
   store.clearDrill();
 }

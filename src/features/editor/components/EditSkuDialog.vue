@@ -30,6 +30,7 @@ const baseText = (key: keyof SkuInput) => {
 
 const actionColor = (g: string) => palette.value.action[ACTION_GROUPS.indexOf(g as (typeof ACTION_GROUPS)[number])];
 const abcColor = (c: string) => palette.value.abc[ABC_CLASSES.indexOf(c as (typeof ABC_CLASSES)[number])];
+const categoryPath = (input: SkuInput) => [input.category, input.subcat1, input.subcat2].filter(Boolean).join(' / ');
 
 function commit(key: keyof SkuInput, value: string) {
   if (props.row) store.updateRow(props.row.index, parseEdit(colOf(key), value));
@@ -74,7 +75,7 @@ watch(
             <span :class="row.removed && 'line-through opacity-60'">{{ row.input.sku }}</span>
             <span v-if="row.removed" class="pill">Đã xoá</span>
           </h2>
-          <p class="truncate text-[13px] text-ink-3">{{ row.input.name }}<template v-if="row.input.name"> · </template>{{ row.input.category }}</p>
+          <p class="truncate text-[13px] text-ink-3" :title="categoryPath(row.input)">{{ row.input.name }}<template v-if="row.input.name"> · </template>{{ categoryPath(row.input) }}</p>
         </div>
         <div class="flex flex-none items-center gap-1">
           <button type="button" class="grid size-10 place-items-center rounded-lg text-ink-3 hover:text-ink disabled:opacity-30" aria-label="SKU trước" :disabled="!hasPrev" @click="emit('prev')">
@@ -118,7 +119,7 @@ watch(
                   v-else
                   field
                   :input-id="`edit-${col.key}`"
-                  :value="row.input[col.key] as string | number"
+                  :value="(row.input[col.key] ?? '') as string | number"
                   :numeric="col.kind === 'number'"
                   :edited="isEdited(col.key)"
                   :label="col.label"

@@ -216,7 +216,7 @@ const cell = 'border-t border-line px-1.5 py-1 align-middle';
                 </label>
                 <CellInput
                   v-else
-                  :value="row.input[col.key] as string | number"
+                  :value="(row.input[col.key] ?? '') as string | number"
                   :numeric="col.kind === 'number'"
                   :edited="isEdited(row, col.key)"
                   :label="`${col.label} của ${row.input.sku}`"

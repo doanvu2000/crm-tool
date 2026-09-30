@@ -7,8 +7,8 @@ Tất cả nhận `rows: readonly SkuResult[]` (đã lọc ngành) từ `pages/S
 
 ## overview
 - `components/DecisionHero.vue`: thẻ ưu tiên ABC (điểm nhấn), nhận `crossRows.abc` của ngành đang chọn; mô tả A Phải có, B Nên có, C Cân nhắc có; emit `pick(abc)` → page `toggleDrill('abc')` + cuộn tới #contribution.
-- `components/DrillBar.vue`: thanh "Đang lọc" (chip ngành + chip drill, số SKU còn lại, Xoá lọc). Page đặt sticky: desktop thanh riêng top-16, mobile nằm dưới SectionNav bar.
-- `components/CategoryFilter.vue`: chip đa chọn ngành, có chip “Tổng tất cả ngành hàng”; mảng chọn rỗng là tổng tất cả ngành. ABC của SKU vẫn tính riêng trong ngành hàng nguồn.
+- `components/DrillBar.vue`: thanh "Đang lọc" (đường dẫn ngành/Subcat + chip drill, số SKU còn lại, Xoá lọc). Page đặt sticky: desktop thanh riêng top-16, mobile nằm dưới SectionNav bar.
+- `components/CategoryFilter.vue`: ba ô select gọn có danh sách cuộn, lọc theo Ngành hàng → Subcat 1 → Subcat 2; Subcat phụ thuộc cấp trước, có nhãn và focus keyboard. ABC của SKU vẫn tính riêng trong ngành hàng nguồn.
 - `components/KpiGrid.vue`: 6 tile (Doanh thu + % so kỳ trước, Tổng SKU, SKU class A, Core, Dư tồn DOS > 60, OOS TB).
 - `components/PeriodCompare.vue` (#compare): số lượng + doanh thu kỳ trước → kỳ này, tách thay đổi doanh thu do số lượng / do giá (nút ⓘ `compareEffects`), bảng theo ngành chỉ còn cột Số lượng + Doanh thu, top 5 SKU giảm doanh thu.
 
@@ -25,7 +25,7 @@ Tất cả nhận `rows: readonly SkuResult[]` (đã lọc ngành) từ `pages/S
 
 ## actions
 - `components/ActionSection.vue`: `CountBarChart` ngang full width (pickable theo group), `SkuTable` full width bên dưới (bảng cần đủ ngang).
-- `SkuTable.vue`: mã SKU là button mở `SkuTrace` (rules). Ô Doanh thu có dòng phụ % so kỳ trước (title = doanh thu kỳ trước). Tìm kiếm, lọc nhóm, sort (aria-sort), phân trang, xuất CSV. Desktop (≥ sm): bảng 10 cột, ngành gộp vào ô SKU. Mobile: danh sách thẻ + select sắp xếp.
+- `SkuTable.vue`: mã SKU là button mở `SkuTrace` (rules). Ô Doanh thu có dòng phụ % so kỳ trước (title = doanh thu kỳ trước). Tìm kiếm, lọc nhóm, sort (aria-sort), phân trang, xuất CSV có đủ Ngành/Subcat 1/2. Desktop (≥ sm): bảng 10 cột, đường dẫn ngành gộp vào ô SKU. Mobile: danh sách thẻ + select sắp xếp.
 - `composables/useSkuTable.ts`: `useSkuTable(rowsRef, actionFilterRef)` (actionFilter lấy từ store để hero điều khiển được), `PAGE_SIZE`, `SortKey`.
 - `lib/exportCsv.ts`: `exportAnalysisCsv(rows)` (có cột doanh thu kỳ trước, chênh lệch, do số lượng, do giá).
 

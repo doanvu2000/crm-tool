@@ -14,6 +14,7 @@ const palette = usePalette();
 const dialog = ref<HTMLDialogElement>();
 
 const live = computed(() => (props.row ? store.rows.find((r) => r.sku === props.row!.sku) ?? props.row : null));
+const categoryPath = computed(() => live.value ? [live.value.category, live.value.subcat1, live.value.subcat2].filter(Boolean).join(' / ') : '');
 
 const categoryAds = computed(() => {
   const r = live.value;
@@ -48,7 +49,7 @@ watch(
         <div class="min-w-0">
           <p class="eyebrow">Cách tính từng bước</p>
           <h2 id="trace-title" class="num mt-1 text-lg font-semibold">{{ live.sku }}</h2>
-          <p class="truncate text-[13px] text-ink-3">{{ live.name }}<template v-if="live.name"> · </template>{{ live.category }}</p>
+          <p class="truncate text-[13px] text-ink-3" :title="categoryPath">{{ live.name }}<template v-if="live.name"> · </template>{{ categoryPath }}</p>
         </div>
         <button type="button" class="grid size-10 flex-none place-items-center rounded-lg text-ink-3 hover:text-ink" aria-label="Đóng" @click="dialog?.close()">
           <AppIcon name="close" class="size-5" />

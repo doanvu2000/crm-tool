@@ -23,6 +23,8 @@ export interface SkuInput {
   sku: string;
   name: string;
   category: string;
+  subcat1?: string;
+  subcat2?: string;
   revenue: number;
   revenuePrev: number;
   gp: number;

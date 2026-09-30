@@ -39,7 +39,7 @@ export function useInputEditor() {
     const out: number[] = [];
     raw.value.forEach((r, i) => {
       if (onlyEdited.value && !editedSet.value.has(i)) return;
-      if (q && !normalizeKey(r.sku + r.name + r.category).includes(q)) return;
+      if (q && !normalizeKey(r.sku + r.name + r.category + (r.subcat1 ?? '') + (r.subcat2 ?? '')).includes(q)) return;
       out.push(i);
     });
     return out;

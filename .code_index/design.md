@@ -35,6 +35,7 @@ Màu chart riêng ở `shared/charts/palette.ts` (neutrals khớp token trên).
 - Focus ring `outline-focus` ở mọi control; dropzone đẩy ring lên label bằng `has-[input:focus-visible]`.
 - Heading: h1 sr-only ở page → h2 section → h3 card.
 - Lỗi import: `role=alert`, lỗi thiếu cột tự mở danh sách cột.
+- Bộ lọc ngành hàng dùng label gắn với native `<select>` có danh sách cuộn, xếp ba cột từ breakpoint `sm`; focus ring rõ, Subcat 1/2 chỉ bật khi chọn cấp cha.
 - Reduced motion: CSS tắt animation, Chart.js tắt animation, cuộn tức thì.
 
 ## Điểm nhấn
