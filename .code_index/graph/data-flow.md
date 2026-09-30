@@ -8,8 +8,8 @@ Dữ liệu mẫu ─────┤─ import/lib/sampleData.ts
                         │
                         ▼
         analysis/store/analysisStore.ts  (Pinia)
-          state:   raw (shallowRef), original (bản file gốc), settings, selectedCategories, sourceLabel
-          actions: setData, updateRow, resetRow, resetAll, updateSettings (sanitizeSettings), setCategories/toggleCategory/selectAllCategories
+          state:   raw (shallowRef), original (bản file gốc), removed (Set index), settings, selectedCategories, sourceLabel
+          actions: setData, restoreSavedData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings (sanitizeSettings), setCategories/toggleCategory/selectAllCategories
           getters: rows = analyzeSkus(raw, settings)   ← cache theo raw + settings
                    categoryRows = rows lọc theo selectedCategories (mảng rỗng = tổng tất cả ngành)
                    visibleRows = categoryRows lọc theo drill (lọc chéo)
@@ -34,6 +34,8 @@ Dữ liệu mẫu ─────┤─ import/lib/sampleData.ts
                         ▼
         shared/charts/ChartCanvas.vue (config computed theo rows + palette)
 ```
+
+Khi nạp dữ liệu hoặc sửa/xoá dòng, store lưu bản phân tích gần nhất vào IndexedDB cục bộ. `main.ts` khôi phục bản này trước khi mount ứng dụng; nếu bộ nhớ trình duyệt không khả dụng, app tiếp tục chạy với state trống. Settings cũng được giữ lại cùng dữ liệu, còn filter hiển thị được khởi tạo lại mặc định.
 
 ## Luồng phụ
 

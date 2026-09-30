@@ -3,6 +3,7 @@ import { computed, markRaw, ref, shallowRef } from 'vue';
 import { analyzeSkus } from '../engine/analyze';
 import { DEFAULT_SETTINGS, sanitizeSettings } from '../model/thresholds';
 import type { ActionGroup, AnalysisSettings, SkuInput, SkuResult } from '../model/types';
+import { loadSavedAnalysis, saveAnalysis } from './analysisPersistence';
 
 export const DRILL_FIELDS = ['group', 'abc', 'velocity', 'dosStatus', 'oosStatus', 'trend'] as const;
 export type DrillField = (typeof DRILL_FIELDS)[number];
@@ -75,6 +76,39 @@ export const useAnalysisStore = defineStore('analysis', () => {
     editedCount.value ? markRaw(analyzeSkus(original.value, settings.value)) : rows.value
   );
 
+  let persistTimer: ReturnType<typeof setTimeout> | undefined;
+  function persistData(delay = 0) {
+    if (persistTimer) clearTimeout(persistTimer);
+    if (delay > 0) {
+      persistTimer = setTimeout(() => {
+        persistTimer = undefined;
+        persistData();
+      }, delay);
+      return;
+    }
+    saveAnalysis({
+      raw: [...raw.value],
+      original: [...original.value],
+      removed: [...removed.value],
+      sourceLabel: sourceLabel.value,
+      settings: { ...settings.value }
+    });
+  }
+
+  async function restoreSavedData() {
+    const saved = await loadSavedAnalysis();
+    if (!saved) return;
+    raw.value = markRaw(saved.raw);
+    original.value = markRaw(saved.original);
+    removed.value = new Set(saved.removed.filter((index) => Number.isInteger(index) && index >= 0 && index < saved.raw.length));
+    sourceLabel.value = saved.sourceLabel;
+    const restoredSettings = saved.settings && typeof saved.settings === 'object'
+      ? { ...DEFAULT_SETTINGS, ...saved.settings }
+      : { ...DEFAULT_SETTINGS };
+    if (restoredSettings.basis !== 'ads' && restoredSettings.basis !== 'index') restoredSettings.basis = DEFAULT_SETTINGS.basis;
+    settings.value = sanitizeSettings(restoredSettings);
+  }
+
   function setData(data: SkuInput[], label: string) {
     raw.value = markRaw(data);
     original.value = raw.value;
@@ -82,6 +116,7 @@ export const useAnalysisStore = defineStore('analysis', () => {
     sourceLabel.value = label;
     selectedCategories.value = [];
     drill.value = {};
+    persistData();
   }
 
   function updateRow(index: number, patch: Partial<SkuInput>) {
@@ -93,6 +128,7 @@ export const useAnalysisStore = defineStore('analysis', () => {
     const copy = raw.value.slice();
     copy[index] = same ? base : next;
     raw.value = markRaw(copy);
+    persistData(250);
   }
 
   function resetRow(index: number) {
@@ -101,11 +137,13 @@ export const useAnalysisStore = defineStore('analysis', () => {
     const copy = raw.value.slice();
     copy[index] = original.value[index];
     raw.value = markRaw(copy);
+    persistData();
   }
 
   function removeRow(index: number) {
     if (removed.value.has(index)) return;
     removed.value = new Set(removed.value).add(index);
+    persistData();
   }
 
   function restoreRow(index: number) {
@@ -113,15 +151,18 @@ export const useAnalysisStore = defineStore('analysis', () => {
     const next = new Set(removed.value);
     next.delete(index);
     removed.value = next;
+    persistData();
   }
 
   function resetAll() {
     raw.value = original.value;
     removed.value = new Set();
+    persistData();
   }
 
   function updateSettings(patch: Partial<AnalysisSettings>) {
     settings.value = sanitizeSettings({ ...settings.value, ...patch });
+    persistData();
   }
 
   function setCategories(next: readonly string[]) {
@@ -172,6 +213,6 @@ export const useAnalysisStore = defineStore('analysis', () => {
   return {
     raw, original, removed, activeRaw, sourceLabel, settings, selectedCategories, actionFilter, drill,
     rows, hasData, categories, categoryRows, visibleRows, crossRows, matrixRows, hasDrill, editedIndexes, editedCount, removedCount, baselineRows,
-    setData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategories, toggleCategory, selectAllCategories, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill
+    setData, restoreSavedData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategories, toggleCategory, selectAllCategories, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill
   };
 });

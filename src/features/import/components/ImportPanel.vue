@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 import { useAnalysisStore } from '@/features/analysis';
 import { fmt0 } from '@/shared/lib/format';
 import { scrollToSection } from '@/shared/lib/scroll';
@@ -18,6 +18,10 @@ const dragDepth = ref(0);
 const dragging = computed(() => dragDepth.value > 0);
 const loading = ref(false);
 const columnsOpen = ref(false);
+
+onMounted(() => {
+  if (store.hasData) setStatus(`Đã khôi phục ${fmt0(store.raw.length)} SKU từ ${store.sourceLabel} trên máy này.`);
+});
 
 const setStatus = (text: string, error = false) => (status.value = { text, error });
 

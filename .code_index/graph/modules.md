@@ -2,6 +2,7 @@
 
 | Module | Import từ | Được dùng bởi |
 |---|---|---|
+| `main.ts` | `features/analysis` (restore local dataset trước mount) | bootstrap |
 | `app/` | `shared/composables`, `shared/ui`, `features/onboarding` (useTour cho nút Hướng dẫn), `pages` (lazy) | `main.ts`, `App.vue` |
 | `pages/SkuAnalysisPage` | mọi `features/*/index.ts`, `shared/ui`, `shared/lib` | router |
 | `features/analysis` | `shared/lib/format` | mọi feature |

@@ -4,7 +4,7 @@
 
 | File | Trách nhiệm |
 |---|---|
-| `components/ImportPanel.vue` | Dropzone (đếm dragenter/leave chống nháy), nút dữ liệu mẫu, tải file mẫu, status aria-live, danh sách cột |
+| `components/ImportPanel.vue` | Dropzone (đếm dragenter/leave chống nháy), nút dữ liệu mẫu, tải file mẫu, status aria-live, thông báo dữ liệu được khôi phục, danh sách cột |
 | `lib/columns.ts` | `COLUMNS` (key, label, required, aliases), `TEMPLATE_HEADER` |
 | `lib/mapRows.ts` | Map header → `SkuInput`, báo thiếu cột bắt buộc bằng `ImportError` |
 | `lib/readSheet.ts` | `ACCEPTED_FILE`, `readSheet` (dynamic import `xlsx`) |
