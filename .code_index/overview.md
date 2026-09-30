@@ -42,6 +42,7 @@ src/
 │   ├── overview/           lọc phân cấp ngành hàng → Subcat 1/2 + KPI tiles + so với kỳ trước
 │   ├── contribution/       Pareto, cơ cấu ABC, ma trận ABC x Velocity, Exception
 │   ├── inventory/          phân bố Velocity/DOS/OOS/Trend + scatter DOS x Growth
+│   ├── monthly-sales/      nhập dữ liệu lịch sử theo tháng + biểu đồ doanh thu theo cửa hàng
 │   ├── actions/            phân bổ Action + bảng SKU (lọc/sort/trang/xuất CSV)
 │   ├── editor/             bảng sửa dữ liệu đầu vào realtime + dải tác động Action
 │   ├── onboarding/         tour highlight hướng dẫn lần đầu (2 phase: intro, data)

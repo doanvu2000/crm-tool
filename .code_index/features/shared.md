@@ -7,7 +7,7 @@
 | `ChartCanvas.vue` | props `config`, `label`, `tall`. Lazy init theo viewport, cùng type + cùng indexAxis thì `chart.update()` tại chỗ, khác thì dựng lại, destroy khi unmount |
 | `CountBarChart.vue` | Card + bar đếm SKU. props `title`, `subtitle`, `labels`, `data`, `colorKey`, `horizontal`, `tall`, `pickable`, `active`; emit `pick(label)`; slot `info`. Pickable có hàng nút ẩn (hiện khi focus bàn phím). Màn < 640px tự chuyển bar ngang (tránh nhãn xoay chéo) |
 | `options.ts` | `animation()`, `tooltipStyle(p)`, `valueAxis(p)` (tick format vi-VN), `categoryAxis(p)`, `countBarConfig(p, labels, data, colors, horizontal, active, onPick)` (cột không chọn mờ alpha 40) |
-| `palette.ts` | `PALETTE.light/dark`, type `ChartPalette` |
+| `palette.ts` | `PALETTE.light/dark`, type `ChartPalette`, gồm bảng màu chuỗi `series` cho nhiều cửa hàng trên biểu đồ lịch sử |
 
 Plugin đọc màu từ `options.plugins.<id>` nên đổi theme chỉ cần update, không cần tạo lại chart.
 

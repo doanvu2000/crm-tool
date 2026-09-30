@@ -21,6 +21,7 @@ Khai báo trong `@theme`, dark mode ghi đè biến ở `:root.dark`, nên compo
 | `edit` (`border-edit`, `bg-edit/5`, `text-edit`) | #db2777 | #f472b6 | ô / dòng đã sửa trong bảng dữ liệu đầu vào, số đã sửa |
 
 Màu chart riêng ở `shared/charts/palette.ts` (neutrals khớp token trên).
+Biểu đồ doanh thu theo cửa hàng dùng bảng màu chuỗi `series` trong palette, tự đổi theo theme.
 
 ## Chữ
 

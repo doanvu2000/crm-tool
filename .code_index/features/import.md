@@ -1,6 +1,6 @@
 # features/import
 
-Đưa dữ liệu vào store. Public API: `ImportPanel`, `mapRows`, `parseLifecycle`, `ImportError`, `generateSampleData`, `COLUMNS`.
+Đưa dữ liệu vào store. Public API: `ImportPanel`, `mapRows`, `parseLifecycle`, `ImportError`, `generateSampleData`, `COLUMNS`, `readSheet`, `ACCEPTED_FILE`.
 
 | File | Trách nhiệm |
 |---|---|
@@ -13,5 +13,6 @@
 
 Cột bắt buộc: sku, revenue, units, unitsPrev, stock. `revenuePrev` (`revenue_prev`) tuỳ chọn: thiếu thì engine ước tính.
 `ImportPanel`: nút `data-tour="sample"`, card `data-tour="import"`, có dữ liệu thì hiện nút "Xem và sửa dữ liệu" cuộn tới #input. Alias so khớp sau `normalizeKey` (bỏ dấu, lowercase).
+`index.ts` công khai thêm `readSheet` và `ACCEPTED_FILE` để feature lịch sử doanh thu dùng chung bộ đọc CSV/XLSX.
 Thêm cột: thêm entry vào `COLUMNS` + field trong `SkuInput` + map trong `mapRows`.
 `category`, `subcat1`, `subcat2` là các cấp phân loại; hai cột Subcat tùy chọn để file cũ vẫn nhập được.

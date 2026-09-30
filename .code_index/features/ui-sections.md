@@ -12,6 +12,9 @@ Tất cả nhận `rows: readonly SkuResult[]` (đã lọc ngành) từ `pages/S
 - `components/KpiGrid.vue`: 6 tile (Doanh thu + % so kỳ trước, Tổng SKU, SKU class A, Core, Dư tồn DOS > 60, OOS TB).
 - `components/PeriodCompare.vue` (#compare): số lượng + doanh thu kỳ trước → kỳ này, tách thay đổi doanh thu do số lượng / do giá (nút ⓘ `compareEffects`), bảng theo ngành chỉ còn cột Số lượng + Doanh thu, top 5 SKU giảm doanh thu.
 
+## monthly-sales
+- `features/monthly-sales/components/MonthlySalesSection.vue` (#monthly-sales): nhập file lịch sử `month, store, sku, revenue, units`, checkbox chọn nhiều cửa hàng, biểu đồ đường doanh thu theo tháng; dữ liệu lưu cục bộ riêng bằng IndexedDB.
+
 ## contribution
 - `components/ContributionSection.vue`: layout 12 cột.
 - `ParetoChart.vue`: Pareto Sales tích luỹ trong phạm vi ngành đang chọn, màu theo class ABC, 1 trục (không dual axis). Khi chọn nhiều hoặc tổng tất cả ngành, chart tổng hợp Sales nhưng giữ class ABC đã tính riêng từng ngành.

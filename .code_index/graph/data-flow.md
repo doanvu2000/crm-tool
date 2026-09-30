@@ -35,6 +35,18 @@ Dữ liệu mẫu ─────┤─ import/lib/sampleData.ts
         shared/charts/ChartCanvas.vue (config computed theo rows + palette)
 ```
 
+Lịch sử doanh thu theo tháng có luồng riêng, không đi qua engine phân tích SKU:
+
+```
+File .csv/.xlsx/.xls (month, store, sku, revenue, units)
+  → import/readSheet → monthly-sales/lib/mapMonthlySales
+  → monthly-sales/store (shallowRef + IndexedDB cục bộ)
+  → tổng doanh thu theo tháng/cửa hàng đã chọn
+  → monthly-sales/components/MonthlySalesSection → ChartCanvas (line)
+```
+
+`monthly-sales/store` phục hồi lịch sử đã nhập khi section được mount; danh sách cửa hàng được chọn lại mặc định.
+
 Khi nạp dữ liệu hoặc sửa/xoá dòng, store lưu bản phân tích gần nhất vào IndexedDB cục bộ. `main.ts` khôi phục bản này trước khi mount ứng dụng; nếu bộ nhớ trình duyệt không khả dụng, app tiếp tục chạy với state trống. Settings cũng được giữ lại cùng dữ liệu, còn filter hiển thị được khởi tạo lại mặc định.
 
 ## Luồng phụ

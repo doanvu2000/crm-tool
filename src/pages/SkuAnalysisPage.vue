@@ -7,6 +7,7 @@ import { ContributionSection } from '@/features/contribution';
 import { InputEditorSection } from '@/features/editor';
 import { ImportPanel } from '@/features/import';
 import { InventorySection } from '@/features/inventory';
+import { MonthlySalesSection } from '@/features/monthly-sales';
 import { TourOverlay } from '@/features/onboarding';
 import { CategoryFilter, DecisionHero, DrillBar, KpiGrid, PeriodCompare } from '@/features/overview';
 import { MethodInfo, RulesPanel } from '@/features/rules';
@@ -26,6 +27,7 @@ const navItems = computed(() => [
   { id: 'data', label: 'Dữ liệu' },
   { id: 'dashboard', label: 'Quyết định', meta: fmt0(visibleRows.value.length) },
   { id: 'overview', label: 'Tổng quan' },
+  { id: 'monthly-sales', label: 'Doanh thu tháng' },
   { id: 'contribution', label: 'Đóng góp' },
   { id: 'inventory', label: 'Tồn kho' },
   { id: 'actions', label: 'Chi tiết Action' },
@@ -66,7 +68,9 @@ async function pickAbc(abc: AbcClass) {
         </p>
       </div>
 
-      <template v-else>
+      <MonthlySalesSection v-if="!hasData" class="mt-6" />
+
+      <template v-if="hasData">
         <div id="dashboard" class="mt-6 scroll-mt-40">
           <DecisionHero data-tour="decision" :rows="crossRows.abc" :categories="selectedCategories" :source="sourceLabel" @pick="pickAbc" />
           <div class="mt-4">
@@ -81,6 +85,8 @@ async function pickAbc(abc: AbcClass) {
           <KpiGrid :rows="visibleRows" />
           <PeriodCompare id="compare" data-tour="compare" :rows="visibleRows" class="mt-4" />
         </section>
+
+        <MonthlySalesSection class="mt-6" />
 
         <ContributionSection id="contribution" class="scroll-mt-40" :rows="visibleRows" />
         <InventorySection id="inventory" class="scroll-mt-40" :rows="visibleRows" :basis="settings.basis" />

@@ -17,6 +17,7 @@ export interface ChartPalette {
   oos: string[];
   trend: string[];
   action: string[];
+  series: string[];
   heat: string[];
   heatInk: string[];
 }
@@ -38,6 +39,7 @@ export const PALETTE: Record<Theme, ChartPalette> = {
     oos: ['#059669', '#f59e0b', '#f97316', '#dc2626'],
     trend: ['#1d4ed8', '#60a5fa', '#cbd5e1', '#f87171', '#b91c1c'],
     action: ['#2563eb', '#059669', '#f59e0b', '#dc2626', '#7c3aed'],
+    series: ['#2563eb', '#ea580c', '#059669', '#dc2626', '#7c3aed', '#0891b2', '#a16207', '#db2777'],
     heat: ['#f1f5f9', '#dbeafe', '#93c5fd', '#3b82f6', '#1d4ed8'],
     heatInk: ['#64748b', '#1e3a8a', '#1e3a8a', '#ffffff', '#ffffff']
   },
@@ -57,6 +59,7 @@ export const PALETTE: Record<Theme, ChartPalette> = {
     oos: ['#10b981', '#fbbf24', '#f97316', '#ef4444'],
     trend: ['#60a5fa', '#1d4ed8', '#475569', '#b91c1c', '#f87171'],
     action: ['#3b82f6', '#10b981', '#fbbf24', '#ef4444', '#a78bfa'],
+    series: ['#60a5fa', '#fb923c', '#34d399', '#f87171', '#c4b5fd', '#22d3ee', '#facc15', '#f472b6'],
     heat: ['#1e293b', '#1e3a8a', '#1d4ed8', '#3b82f6', '#93c5fd'],
     heatInk: ['#94a3b8', '#dbeafe', '#ffffff', '#ffffff', '#0f172a']
   }
