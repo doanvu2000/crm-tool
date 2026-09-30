@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
-import { ALL_CATEGORIES, useAnalysisStore, type ActionGroup } from '@/features/analysis';
+import { useAnalysisStore, type AbcClass } from '@/features/analysis';
 import { ActionSection } from '@/features/actions';
 import { ContributionSection } from '@/features/contribution';
 import { InputEditorSection } from '@/features/editor';
@@ -18,8 +18,8 @@ import SectionHeader from '@/shared/ui/SectionHeader.vue';
 import SectionNav from '@/shared/ui/SectionNav.vue';
 
 const store = useAnalysisStore();
-const { hasData, visibleRows, crossRows, settings, sourceLabel, editedCount, hasDrill, category } = storeToRefs(store);
-const filtering = computed(() => hasDrill.value || category.value !== ALL_CATEGORIES);
+const { hasData, visibleRows, crossRows, settings, sourceLabel, editedCount, hasDrill, selectedCategories } = storeToRefs(store);
+const filtering = computed(() => hasDrill.value);
 
 // Thứ tự phải khớp thứ tự trên trang để mục lục tô đúng mục đang đọc.
 const navItems = computed(() => [
@@ -33,10 +33,10 @@ const navItems = computed(() => [
   { id: 'rules', label: 'Quy tắc' }
 ]);
 
-async function pickGroup(group: ActionGroup) {
-  store.toggleDrill('group', group);
+async function pickAbc(abc: AbcClass) {
+  store.toggleDrill('abc', abc);
   await nextTick();
-  scrollToSection('actions');
+  scrollToSection('contribution');
 }
 </script>
 
@@ -68,7 +68,7 @@ async function pickGroup(group: ActionGroup) {
 
       <template v-else>
         <div id="dashboard" class="mt-6 scroll-mt-40">
-          <DecisionHero data-tour="decision" :rows="crossRows.group" :period-days="settings.periodDays" :source="sourceLabel" @pick="pickGroup" />
+          <DecisionHero data-tour="decision" :rows="crossRows.abc" :categories="selectedCategories" :source="sourceLabel" @pick="pickAbc" />
           <div class="mt-4">
             <CategoryFilter data-tour="category" />
           </div>
@@ -82,7 +82,7 @@ async function pickGroup(group: ActionGroup) {
           <PeriodCompare id="compare" data-tour="compare" :rows="visibleRows" class="mt-4" />
         </section>
 
-        <ContributionSection id="contribution" class="scroll-mt-40" :rows="visibleRows" :metric="settings.metric" />
+        <ContributionSection id="contribution" class="scroll-mt-40" :rows="visibleRows" />
         <InventorySection id="inventory" class="scroll-mt-40" :rows="visibleRows" :basis="settings.basis" />
         <ActionSection id="actions" class="scroll-mt-40" :rows="visibleRows" />
         <InputEditorSection id="input" class="scroll-mt-40" />

@@ -18,7 +18,7 @@ const { restart } = useTour();
         </span>
         <span class="min-w-0">
           <span class="block whitespace-nowrap text-[17px] font-semibold leading-tight tracking-tight">SKU Analysis</span>
-          <span class="eyebrow hidden truncate sm:block">Quyết định PO theo ABC · DOS · OOS</span>
+          <span class="eyebrow hidden truncate sm:block">ABC CVS theo Sales · DOS · OOS</span>
         </span>
       </a>
       <div class="flex flex-none items-center gap-2">

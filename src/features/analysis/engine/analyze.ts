@@ -1,14 +1,14 @@
-import { assignAbc } from './abc';
+import { assignAbcByCategory } from './abc';
 import { decideAction } from './actions';
 import { dosStatus, isCoreSku, oosStatus, trendStatus, velocityByAds, velocityByIndex } from './classify';
 import { categoryAverageAds, computeBaseMetrics } from './metrics';
 import type { AnalysisSettings, SkuContext, SkuInput, SkuResult } from '../model/types';
 
-/** Pipeline thuần (không UI): metrics → ABC → phân loại → Action. Kết quả xếp theo rank ABC. */
+/** Pipeline thuần (không UI): metrics → ABC theo ngành hàng → phân loại → Action. */
 export function analyzeSkus(raw: readonly SkuInput[], settings: AnalysisSettings): SkuResult[] {
   const withMetrics = raw.map((r) => ({ ...r, ...computeBaseMetrics(r, settings.periodDays) }));
   const catAds = categoryAverageAds(withMetrics);
-  const ranked = assignAbc(withMetrics, settings.metric, settings.cutA, settings.cutB);
+  const ranked = assignAbcByCategory(withMetrics, settings.cutA, settings.cutB);
 
   return ranked.map((r) => {
     const avg = catAds.get(r.category) ?? 0;

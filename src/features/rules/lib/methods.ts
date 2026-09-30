@@ -9,7 +9,7 @@ export interface MethodContext {
   settings: AnalysisSettings;
   total: number;
   visible: number;
-  category: string | null;
+  categories: readonly string[];
 }
 
 export interface MethodNote {
@@ -17,10 +17,11 @@ export interface MethodNote {
   items: { label: string; text: string }[];
 }
 
-export const METRIC_LABEL = { revenue: 'doanh thu', gp: 'GP', units: 'số lượng bán' } as const;
-
-const scope = (c: MethodContext) =>
-  c.category ? `${fmt0(c.visible)} SKU ngành ${c.category} (lọc ngành đang bật)` : `${fmt0(c.visible)} SKU, tất cả ngành`;
+const scope = (c: MethodContext) => {
+  if (!c.categories.length) return `${fmt0(c.visible)} SKU, tổng tất cả ngành hàng`;
+  if (c.categories.length === 1) return `${fmt0(c.visible)} SKU ngành ${c.categories[0]} (lọc ngành đang bật)`;
+  return `${fmt0(c.visible)} SKU thuộc ${fmt0(c.categories.length)} ngành hàng đã chọn`;
+};
 
 export function velocityRule(s: AnalysisSettings) {
   if (s.basis === 'index') {
@@ -48,7 +49,7 @@ export const coreRule = () =>
   `Class A, ADS ≥ ${T.core.minAds}, ADS Index ≥ ${pct(T.core.minAdsIndex, 0)}, OOS ≤ ${pct(T.core.maxOosRate, 0)}, không phải EOL.`;
 
 export const abcRule = (s: AnalysisSettings, total: number) =>
-  `Xếp ${fmt0(total)} SKU giảm dần theo ${METRIC_LABEL[s.metric]}. SKU vào A khi tích luỹ trước nó < ${pct(s.cutA, 0)}, vào B khi < ${pct(s.cutB, 0)}, còn lại C. Tính trên toàn bộ dữ liệu, không đổi theo lọc ngành.`;
+  `Xếp ${fmt0(total)} SKU giảm dần theo Sales (doanh thu bán thực tế) trong từng ngành hàng. SKU vào A khi tích luỹ trước nó < ${pct(s.cutA, 0)}, vào B khi < ${pct(s.cutB, 0)}, còn lại C.`;
 
 export const compareRule = () =>
   'Doanh thu kỳ trước lấy từ cột revenue_prev. Thiếu cột này thì ước tính = số lượng kỳ trước x giá bình quân kỳ này. Phần do số lượng = (SL kỳ này - SL kỳ trước) x giá bình quân kỳ trước. Phần do giá = chênh lệch doanh thu - phần do số lượng. Doanh thu ước tính thì phần do giá = 0.';
@@ -104,7 +105,7 @@ export function methodNote(topic: MethodTopic, c: MethodContext): MethodNote {
         title: 'Pareto đóng góp',
         items: [
           { label: 'Class ABC', text: abcRule(s, c.total) },
-          { label: 'Đường tích luỹ', text: `Vẽ ${scope(c)}, tích luỹ tính lại trong tập đang xem nên cột cuối luôn 100%. Màu cột là class ABC tính trên toàn bộ dữ liệu.` }
+          { label: 'Đường tích luỹ', text: `Vẽ ${scope(c)}, tích luỹ tính lại trong tập đang xem nên cột cuối luôn 100%. Màu cột giữ class ABC đã tính theo Sales của ngành hàng.` }
         ]
       };
     case 'abcMix':
@@ -113,7 +114,7 @@ export function methodNote(topic: MethodTopic, c: MethodContext): MethodNote {
         items: [
           { label: 'Dữ liệu', text: scope(c) },
           { label: '% số SKU', text: 'Số SKU mỗi class / tổng SKU đang xem.' },
-          { label: '% đóng góp', text: `Tổng ${METRIC_LABEL[s.metric]} mỗi class / tổng ${METRIC_LABEL[s.metric]} đang xem.` },
+          { label: '% đóng góp', text: 'Tổng Sales mỗi class / tổng Sales của ngành hàng đang xem.' },
           { label: 'Class ABC', text: abcRule(s, c.total) }
         ]
       };
@@ -129,13 +130,12 @@ export function methodNote(topic: MethodTopic, c: MethodContext): MethodNote {
       };
     case 'exceptions':
       return {
-        title: 'Exception',
+        title: 'Ngoại lệ ABC',
         items: [
-          { label: 'New SKU', text: 'Lifecycle = New, hoặc kỳ trước không bán mà kỳ này có bán. Không tính EOL.' },
-          { label: 'EOL', text: 'Lifecycle = EOL (ngừng kinh doanh).' },
-          { label: 'Seasonal', text: 'Cột seasonal = Y.' },
-          { label: 'Severe OOS', text: `OOS Rate > ${pct(T.oos.critical, 0)}.` },
-          { label: 'Vì sao tách', text: 'Các nhóm này được xét trước trong bảng Rule, không đi theo nhánh DOS + ABC thông thường.' }
+          { label: 'New Product', text: 'Lifecycle = New, hoặc kỳ trước không bán mà kỳ này có bán. Cần thời gian test trước khi xếp ABC.' },
+          { label: 'Seasonal', text: 'Cột seasonal = Y, cần đánh giá theo mùa vụ.' },
+          { label: 'Strategic / Traffic / Promotion', text: 'Cần gắn cờ riêng trong dữ liệu. Không giảm hoặc delist chỉ dựa trên class ABC khi thuộc các nhóm này.' },
+          { label: 'Nguyên tắc', text: 'C liên tục nhiều kỳ là tín hiệu review delist sau khi loại trừ ngoại lệ, không phải lệnh delist tự động.' }
         ]
       };
     case 'velocity':

@@ -13,7 +13,7 @@ const counts = computed(() => countBy(store.crossRows.group, 'group', ACTION_GRO
 
 <template>
   <section aria-label="Action đề xuất">
-    <SectionHeader title="Action đề xuất" hint="ABC kết hợp Demand, Inventory, Trend, Lifecycle" />
+    <SectionHeader title="Action đề xuất" hint="ABC xác định ưu tiên, business rule quyết định action" />
     <!-- Bảng 11 cột cần full chiều ngang; đặt cạnh chart sẽ phải cuộn ngang trên desktop. -->
     <div class="grid grid-cols-1 gap-4">
       <CountBarChart

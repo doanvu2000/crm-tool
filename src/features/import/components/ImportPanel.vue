@@ -65,7 +65,7 @@ function useSample() {
 </script>
 
 <template>
-  <BaseCard data-tour="import" eyebrow="Bước 1" title="Nhập dữ liệu SKU" subtitle="File CSV hoặc Excel, mỗi dòng là 1 SKU trong cùng 1 kỳ. File chỉ đọc trên máy, không gửi đi đâu.">
+  <BaseCard data-tour="import" eyebrow="Bước 1" title="Nhập dữ liệu SKU" subtitle="File CSV hoặc Excel, mỗi dòng là 1 SKU trong rolling 8 tuần gần nhất. File chỉ đọc trên máy, không gửi đi đâu.">
     <label
       for="file-input"
       class="flex min-h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-5 text-center transition-colors has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-focus"

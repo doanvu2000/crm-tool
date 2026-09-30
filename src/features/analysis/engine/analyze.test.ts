@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { createPinia, setActivePinia } from 'pinia';
 import { analyzeSkus } from './analyze';
 import { assignAbc } from './abc';
 import { comparePrevious } from './metrics';
 import { dosStatus, oosStatus, trendStatus, velocityByAds } from './classify';
 import { DEFAULT_SETTINGS } from '../model/thresholds';
+import { useAnalysisStore } from '../store/analysisStore';
 import type { SkuInput } from '../model/types';
 
 const sku = (over: Partial<SkuInput>): SkuInput => ({
@@ -45,21 +47,33 @@ describe('classify', () => {
 });
 
 describe('assignAbc', () => {
-  it('SKU vắt qua ngưỡng 80% vẫn là A', () => {
+  it('SKU vắt qua ngưỡng A vẫn là A', () => {
     const rows = [sku({ sku: 'a', revenue: 70 }), sku({ sku: 'b', revenue: 20 }), sku({ sku: 'c', revenue: 6 }), sku({ sku: 'd', revenue: 4 })];
-    const out = assignAbc(rows, 'revenue', 0.8, 0.95);
+    const out = assignAbc(rows, 0.8, 0.95);
     expect(out.map((r) => r.abc)).toEqual(['A', 'A', 'B', 'C']);
   });
 
   it('doanh thu 0 luôn là C', () => {
-    const out = assignAbc([sku({ sku: 'z', revenue: 0 })], 'revenue', 0.8, 0.95);
+    const out = assignAbc([sku({ sku: 'z', revenue: 0 })], 0.8, 0.95);
     expect(out[0].abc).toBe('C');
   });
 });
 
 describe('analyzeSkus', () => {
+  it('xếp ABC độc lập theo từng ngành hàng', () => {
+    const rows = analyzeSkus([
+      sku({ sku: 'a1', category: 'A', revenue: 70 }),
+      sku({ sku: 'a2', category: 'A', revenue: 30 }),
+      sku({ sku: 'b1', category: 'B', revenue: 20 }),
+      sku({ sku: 'b2', category: 'B', revenue: 10 })
+    ], DEFAULT_SETTINGS);
+    expect(rows.map((r) => [r.sku, r.abc, r.rank])).toEqual([
+      ['a1', 'A', 1], ['a2', 'B', 2], ['b1', 'A', 1], ['b2', 'A', 2]
+    ]);
+  });
+
   it('ADS loại ngày OOS và Severe OOS được ưu tiên bổ sung', () => {
-    const [r] = analyzeSkus([sku({ units: 200, oosDays: 10, stock: 50 })], DEFAULT_SETTINGS);
+    const [r] = analyzeSkus([sku({ units: 200, oosDays: 10, stock: 50, days: 30 })], DEFAULT_SETTINGS);
     expect(r.ads).toBe(10);
     expect(r.oosStatus).toBe('Severe OOS');
     expect(r.group).toBe('Tăng PO');
@@ -72,7 +86,7 @@ describe('analyzeSkus', () => {
   });
 
   it('Core SKU cần A, ADS ≥ 20, Index ≥ 70%, OOS ≤ 10%', () => {
-    const rows = analyzeSkus([sku({ sku: 'core', revenue: 1000, units: 900, stock: 600 }), sku({ sku: 'small', revenue: 1, units: 30 })], DEFAULT_SETTINGS);
+    const rows = analyzeSkus([sku({ sku: 'core', revenue: 1000, units: 1200, stock: 600 }), sku({ sku: 'small', revenue: 1, units: 30 })], DEFAULT_SETTINGS);
     const core = rows.find((r) => r.sku === 'core')!;
     expect(core.isCore).toBe(true);
     expect(core.reasons[0]).toBe('Core SKU');
@@ -82,6 +96,26 @@ describe('analyzeSkus', () => {
     const [r] = analyzeSkus([sku({ units: 0, unitsPrev: 10, stock: 100 })], DEFAULT_SETTINGS);
     expect(r.dos).toBe(Infinity);
     expect(r.group).toBe('Stop PO / Xả hàng');
+  });
+});
+
+describe('lọc ngành hàng', () => {
+  it('chọn nhiều ngành hoặc quay lại tổng tất cả ngành hàng', () => {
+    setActivePinia(createPinia());
+    const store = useAnalysisStore();
+    store.setData([sku({ sku: 'a', category: 'A' }), sku({ sku: 'b', category: 'B' }), sku({ sku: 'c', category: 'C' })], 'test');
+
+    expect(store.selectedCategories).toEqual([]);
+    expect(store.categoryRows).toHaveLength(3);
+
+    store.toggleCategory('A');
+    store.toggleCategory('C');
+    expect(store.selectedCategories).toEqual(['A', 'C']);
+    expect(store.categoryRows.map((r) => r.category)).toEqual(['A', 'C']);
+
+    store.selectAllCategories();
+    expect(store.selectedCategories).toEqual([]);
+    expect(store.categoryRows).toHaveLength(3);
   });
 });
 

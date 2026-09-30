@@ -8,21 +8,22 @@ Trái tim nghiệp vụ. Engine thuần TS + Pinia store. Public API: `features/
 |---|---|
 | `model/types.ts` | Hằng thứ tự (`ABC_CLASSES`, `VELOCITY_LEVELS`, `DOS_LEVELS`, `OOS_LEVELS`, `TREND_LEVELS`, `ACTION_GROUPS`, `LIFECYCLES`) + type `SkuInput`, `AnalysisSettings`, `BaseMetrics`, `AbcAssignment`, `Classification`, `ActionDecision`, `SkuContext`, `SkuResult` |
 | `model/actionRules.ts` | `ACTION_RULES` (id, stage, when, group, action) theo đúng thứ tự xét, `ActionRuleId`, `ACTION_RULE_BY_ID`. `decideAction` lấy group/action từ đây nên bảng Quy tắc luôn khớp engine |
-| `model/thresholds.ts` | `THRESHOLDS` (mọi ngưỡng Pilot), `DEFAULT_SETTINGS`, `sanitizeSettings` |
+| `model/thresholds.ts` | `THRESHOLDS` (mọi ngưỡng Pilot), `DEFAULT_SETTINGS` ABC CVS (56 ngày, A 70%, B 90%), `sanitizeSettings` |
 | `engine/metrics.ts` | `computeBaseMetrics`, `comparePrevious`, `categoryAverageAds` |
-| `engine/abc.ts` | `metricValue`, `assignAbc` |
+| `engine/abc.ts` | `salesValue`, `assignAbc`, `assignAbcByCategory` (Pareto theo Sales riêng từng ngành) |
 | `engine/classify.ts` | `velocityByAds`, `velocityByIndex`, `dosStatus`, `oosStatus`, `trendStatus`, `isCoreSku` |
 | `engine/actions.ts` | `decideAction` (rule engine), trả `rule` id + group + action + reasons |
 | `engine/analyze.ts` | `analyzeSkus` pipeline |
 | `engine/aggregate.ts` | `countBy`, `sumBy` |
-| `engine/analyze.test.ts` | Vitest cho biên ngưỡng, ABC, Severe OOS, EOL, Core, Overstock |
-| `store/analysisStore.ts` | `useAnalysisStore` (state: raw, original, removed (Set index đã xoá), sourceLabel, settings, category, actionFilter; drill; getters: activeRaw (raw bỏ removed, đầu vào của analyzeSkus), rows, categoryRows, visibleRows, crossRows, matrixRows, hasDrill, editedIndexes (sửa hoặc xoá), editedCount, removedCount, baselineRows; actions: setData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategory, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill), `ALL_CATEGORIES`, `DRILL_FIELDS`, `DRILL_LABEL`. `actionFilter` là computed get/set trên `drill.group` |
+| `engine/analyze.test.ts` | Vitest cho biên ngưỡng, ABC, Severe OOS, EOL, Core, Overstock và lọc đa ngành / tổng tất cả ngành |
+| `store/analysisStore.ts` | `useAnalysisStore` (state: raw, original, removed (Set index đã xoá), sourceLabel, settings, selectedCategories, actionFilter; drill; getters: activeRaw (raw bỏ removed, đầu vào của analyzeSkus), rows, categoryRows, visibleRows, crossRows, matrixRows, hasDrill, editedIndexes (sửa hoặc xoá), editedCount, removedCount, baselineRows; actions: setData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategories, toggleCategory, selectAllCategories, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill), `DRILL_FIELDS`, `DRILL_LABEL`. Mảng `selectedCategories` rỗng nghĩa là tổng tất cả ngành; `actionFilter` là computed get/set trên `drill.group` |
 
 ## Rules (theo `Nguyên tắc xây  dựng Analysis.md`, kèm cách hiểu đã chốt)
 
 - ADS = Units / Selling Days; Selling Days = days - OOS days.
 - ADS Index = ADS / ADS trung bình ngành hàng.
-- ABC theo metric chọn (revenue/gp/units), SKU vào A khi tích luỹ TRƯỚC nó < cutA. Tính trên toàn bộ dữ liệu.
+- ABC CVS chỉ theo Sales (doanh thu bán thực tế) của rolling 8 tuần. Xếp riêng trong từng ngành hàng; SKU vào A khi tích luỹ TRƯỚC nó < 70%, B khi < 90%, còn lại C.
+- ABC xác định mức ưu tiên quản lý: A Phải có, B Nên có, C Cân nhắc có. Business rule mới quyết định action cuối cùng; C không tự động là delist.
 - Velocity ADS: ≥20 Fast, ≥15 Normal, >5 Slow, còn lại Very Slow (ngưỡng liên tục, lấp khe 5-6, 14-15, 19-20 của tài liệu).
 - Velocity Index: ≥100% Fast, ≥70% Normal, ≥30% Slow.
 - Core: A + ADS ≥ 20 + Index ≥ 70% + OOS ≤ 10% + không EOL.
@@ -43,5 +44,5 @@ Trái tim nghiệp vụ. Engine thuần TS + Pinia store. Public API: `features/
 
 - `drill`: `{ group?, abc?, velocity?, dosStatus?, oosStatus?, trend? }`, AND với nhau và với `category`.
 - `visibleRows` = category + mọi drill. `crossRows[field]` = category + drill trừ chính field đó: chart sở hữu field vẫn hiện đủ cột, cột đang chọn đậm, cột khác mờ.
-- `matrixRows` bỏ cả abc + velocity. ABC vẫn tính trên toàn bộ dữ liệu, drill chỉ lọc hiển thị.
+- `matrixRows` bỏ cả abc + velocity. ABC vẫn tính trên tập dữ liệu đã nạp, nhưng Pareto/rank được tách độc lập theo ngành hàng; drill chỉ lọc hiển thị.
 - Sửa/thêm field lọc: thêm vào `DRILL_FIELDS` + `DRILL_LABEL`, chart gọi `store.toggleDrill(field, value)`.

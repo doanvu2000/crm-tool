@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { ChartConfiguration } from 'chart.js';
-import { ABC_CLASSES, type AbcMetric, type SkuResult } from '@/features/analysis';
+import { ABC_CLASSES, useAnalysisStore, type SkuResult } from '@/features/analysis';
 import ChartCanvas from '@/shared/charts/ChartCanvas.vue';
 import { animation, categoryAxis, tooltipStyle, valueAxis } from '@/shared/charts/options';
 import { usePalette } from '@/shared/composables/usePalette';
@@ -11,19 +11,18 @@ import ChartLegend from '@/shared/ui/ChartLegend.vue';
 import InsightBox from '@/shared/ui/InsightBox.vue';
 import { MethodInfo } from '@/features/rules';
 
-const props = defineProps<{ rows: readonly SkuResult[]; metric: AbcMetric }>();
+const props = defineProps<{ rows: readonly SkuResult[] }>();
+const store = useAnalysisStore();
 const palette = usePalette();
+const combinedCategories = computed(() => store.selectedCategories.length !== 1);
 
-const METRIC_LABEL: Record<AbcMetric, string> = { revenue: 'doanh thu', gp: 'GP', units: 'số lượng' };
-const metricLabel = computed(() => METRIC_LABEL[props.metric]);
-
-// Chuẩn hoá tích luỹ trong tập đang lọc; class ABC vẫn giữ theo toàn bộ dữ liệu.
+// Chuẩn hoá tích luỹ trong tập đang lọc; class ABC vẫn giữ theo Sales của ngành hàng.
 const points = computed(() => {
-  const list = [...props.rows].sort((a, b) => a.rank - b.rank);
-  const total = list.reduce((s, r) => s + r.share, 0) || 1;
+  const list = [...props.rows].sort((a, b) => b.revenue - a.revenue);
+  const total = list.reduce((s, r) => s + r.revenue, 0) || 1;
   let cum = 0;
   return list.map((r) => {
-    const share = r.share / total;
+    const share = r.revenue / total;
     cum += share;
     return { r, share, cum };
   });
@@ -58,7 +57,8 @@ const config = computed<ChartConfiguration<'bar'>>(() => {
           callbacks: {
             title: (items) => {
               const r = pts[items[0].dataIndex].r;
-              return r.name ? `${r.sku} · ${r.name}` : r.sku;
+              const name = r.name ? `${r.sku} · ${r.name}` : r.sku;
+              return combinedCategories.value ? `${name} · ${r.category}` : name;
             },
             label: (ctx) => {
               const x = pts[ctx.dataIndex];
@@ -86,12 +86,15 @@ const summary = computed(() => {
 </script>
 
 <template>
-  <BaseCard title="Pareto đóng góp" :subtitle="`Tỷ trọng ${metricLabel} tích luỹ theo SKU, xếp giảm dần`">
+  <BaseCard
+    title="Pareto doanh thu"
+    :subtitle="combinedCategories ? 'Tổng hợp Sales theo SKU của các ngành đã chọn. Class ABC vẫn xếp riêng theo ngành.' : 'Tỷ trọng Sales tích luỹ theo SKU, xếp giảm dần trong ngành hàng đang xem'"
+  >
     <template #info><MethodInfo topic="pareto" /></template>
     <ChartLegend :items="legend" />
     <ChartCanvas :config="config" label="Biểu đồ Pareto đóng góp theo SKU" tall />
     <InsightBox>
-      <b>{{ fmt0(summary.count) }} SKU class A</b> ({{ pct(summary.countPct) }} số SKU) tạo <b>{{ pct(summary.share) }}</b> {{ metricLabel }}.
+      <b>{{ fmt0(summary.count) }} SKU nhóm A</b> ({{ pct(summary.countPct) }} số SKU) tạo <b>{{ pct(summary.share) }}</b> doanh thu.
     </InsightBox>
   </BaseCard>
 </template>

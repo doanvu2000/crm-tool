@@ -29,7 +29,7 @@ export function generateSampleData(perCategory = 20, seed = 20260930): SkuInput[
       const units = Math.round(Math.exp(1.6 + rnd() * 5.2));
       const price = Math.round((12 + rnd() * 230) * 1000);
       const oosDays = rnd() < 0.7 ? Math.floor(rnd() * 2) : Math.floor(rnd() * 11);
-      const ads = units / Math.max(1, 30 - oosDays);
+      const ads = units / Math.max(1, 56 - oosDays);
       const lifecycle: Lifecycle = rnd() < 0.06 ? 'New' : rnd() < 0.06 ? 'EOL' : 'Active';
       const unitsPrev = lifecycle === 'New' ? 0 : Math.round(units * (0.55 + rnd() * 0.9));
       const prevPrice = Math.round(price * (0.92 + rnd() * 0.14));

@@ -15,11 +15,10 @@ export const THRESHOLDS = {
 } as const;
 
 export const DEFAULT_SETTINGS: AnalysisSettings = {
-  metric: 'revenue',
   basis: 'ads',
-  periodDays: 30,
-  cutA: 0.8,
-  cutB: 0.95
+  periodDays: 56,
+  cutA: 0.7,
+  cutB: 0.9
 };
 
 export function sanitizeSettings(s: AnalysisSettings): AnalysisSettings {

@@ -1,6 +1,5 @@
-import { ACTION_RULES, THRESHOLDS as T, metricValue, type AnalysisSettings, type SkuResult } from '@/features/analysis';
+import { ACTION_RULES, THRESHOLDS as T, salesValue, type AnalysisSettings, type SkuResult } from '@/features/analysis';
 import { fmt0, fmt1, pct } from '@/shared/lib/format';
-import { METRIC_LABEL } from './methods';
 
 export interface TraceCheck {
   text: string;
@@ -85,12 +84,12 @@ export function traceSku(r: SkuResult, s: AnalysisSettings, categoryAds: number 
     },
     {
       title: 'ABC',
-      formula: `${METRIC_LABEL[s.metric]} ${fmt0(metricValue(r, s.metric))} = ${pct(r.share, 2)} tổng, hạng ${fmt0(r.rank)}. Tích luỹ trước SKU này ${pct(before, 1)}`,
+      formula: `Sales ${fmt0(salesValue(r))} = ${pct(r.share, 2)} tổng ngành ${r.category}, hạng ${fmt0(r.rank)}. Tích luỹ trước SKU này ${pct(before, 1)}`,
       result: before < s.cutA && r.share > 0
         ? `${pct(before, 1)} < ${pct(s.cutA, 0)} → A`
         : before < s.cutB && r.share > 0
           ? `${pct(before, 1)} từ ${pct(s.cutA, 0)} đến dưới ${pct(s.cutB, 0)} → B`
-          : r.share > 0 ? `${pct(before, 1)} ≥ ${pct(s.cutB, 0)} → C` : `${METRIC_LABEL[s.metric]} = 0 → C`
+          : r.share > 0 ? `${pct(before, 1)} ≥ ${pct(s.cutB, 0)} → C` : 'Sales = 0 → C'
     },
     {
       title: 'DOS',

@@ -39,8 +39,7 @@ Màu chart riêng ở `shared/charts/palette.ts` (neutrals khớp token trên).
 
 ## Điểm nhấn
 
-`features/overview/components/DecisionHero.vue`: thẻ nhãn kệ (dải teal + lỗ đục), câu kết luận, dải stacked 5 nhóm Action
-(animation `strip-grow` duy nhất của trang), nút nhóm bấm để lọc bảng SKU (`store.actionFilter`).
+`features/overview/components/DecisionHero.vue`: thẻ nhãn kệ (dải teal + lỗ đục), câu kết luận, dải tỷ trọng Sales A/B/C và ba thẻ A Phải có, B Nên có, C Cân nhắc có để lọc phân tích ABC. Không dùng màu hoặc hành động để ngụ ý C sẽ bị delist tự động.
 
 ## Tour hướng dẫn
 

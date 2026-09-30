@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { ALL_CATEGORIES, useAnalysisStore } from '@/features/analysis';
+import { useAnalysisStore } from '@/features/analysis';
 import InfoPopover from '@/shared/ui/InfoPopover.vue';
 import { methodNote, type MethodTopic } from '../lib/methods';
 
@@ -12,7 +12,7 @@ const note = computed(() =>
     settings: store.settings,
     total: store.rows.length,
     visible: store.visibleRows.length,
-    category: store.category === ALL_CATEGORIES ? null : store.category
+    categories: store.selectedCategories
   })
 );
 </script>

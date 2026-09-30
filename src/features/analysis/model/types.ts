@@ -16,7 +16,6 @@ export type Trend = (typeof TREND_LEVELS)[number] | 'N/A';
 export type ActionGroup = (typeof ACTION_GROUPS)[number];
 export type Lifecycle = (typeof LIFECYCLES)[number];
 
-export type AbcMetric = 'revenue' | 'gp' | 'units';
 export type VelocityBasis = 'ads' | 'index';
 
 /** 1 dòng dữ liệu đầu vào = 1 SKU trong 1 kỳ. */
@@ -38,7 +37,6 @@ export interface SkuInput {
 }
 
 export interface AnalysisSettings {
-  metric: AbcMetric;
   basis: VelocityBasis;
   periodDays: number;
   /** Ngưỡng tích luỹ, dạng 0..1. */

@@ -14,6 +14,7 @@ const rules = computed(() => {
   const s = props.settings;
   return [
     { title: 'ABC', text: abcRule(s, store.rows.length) },
+    { title: 'Chu kỳ review', text: 'Cập nhật mỗi tháng một lần, dùng rolling 8 tuần gần nhất. Không đổi listing chỉ vì SKU thay đổi ABC trong một kỳ.' },
     { title: 'ADS', text: `Units Sold / Selling Days. Selling Days = kỳ ${s.periodDays} ngày trừ số ngày OOS, nên ADS đã loại ảnh hưởng thiếu hàng.` },
     { title: 'ADS Index', text: 'SKU ADS / ADS trung bình của ngành hàng.' },
     { title: 'Tốc độ bán', text: velocityRule(s) },
@@ -46,9 +47,9 @@ const cell = 'border-t border-line px-3 py-2 align-top';
       </div>
     </div>
 
-    <h3 class="card-title mt-6">Bảng Rule ra Action</h3>
+    <h3 class="card-title mt-6">Business rule ra Action</h3>
     <p class="card-sub">
-      Xét từ trên xuống, Rule đầu tiên khớp quyết định Action. Cột SKU đếm trên {{ fmt0(store.visibleRows.length) }} SKU đang xem.
+      ABC xác định mức ưu tiên, không tự quyết định hành động. Xét từ trên xuống, rule đầu tiên khớp quyết định Action. Cột SKU đếm trên {{ fmt0(store.visibleRows.length) }} SKU đang xem.
       Core SKU vẫn đi theo bảng này, chỉ thêm nhãn Core vào lý do.
     </p>
     <div class="overflow-x-auto rounded-xl border border-line">

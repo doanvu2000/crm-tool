@@ -4,8 +4,6 @@ import { analyzeSkus } from '../engine/analyze';
 import { DEFAULT_SETTINGS, sanitizeSettings } from '../model/thresholds';
 import type { ActionGroup, AnalysisSettings, SkuInput, SkuResult } from '../model/types';
 
-export const ALL_CATEGORIES = 'all';
-
 export const DRILL_FIELDS = ['group', 'abc', 'velocity', 'dosStatus', 'oosStatus', 'trend'] as const;
 export type DrillField = (typeof DRILL_FIELDS)[number];
 export type DrillFilter = Partial<Record<DrillField, string>>;
@@ -26,7 +24,9 @@ export const useAnalysisStore = defineStore('analysis', () => {
   const removed = shallowRef<ReadonlySet<number>>(new Set());
   const sourceLabel = ref('');
   const settings = ref<AnalysisSettings>({ ...DEFAULT_SETTINGS });
-  const category = ref<string>(ALL_CATEGORIES);
+  // Mảng rỗng nghĩa là tổng tất cả ngành hàng. Mảng nhỏ này chỉ phục vụ UI
+  // filter nên có thể reactive bình thường; dữ liệu SKU vẫn giữ shallowRef.
+  const selectedCategories = ref<string[]>([]);
   const drill = ref<DrillFilter>({});
   const actionFilter = computed<ActionGroup | 'all'>({
     get: () => (drill.value.group as ActionGroup | undefined) ?? 'all',
@@ -40,7 +40,9 @@ export const useAnalysisStore = defineStore('analysis', () => {
   const hasData = computed(() => raw.value.length > 0);
   const categories = computed(() => [...new Set(rows.value.map((r) => r.category))].sort((a, b) => a.localeCompare(b, 'vi')));
   const categoryRows = computed<readonly SkuResult[]>(() =>
-    category.value === ALL_CATEGORIES ? rows.value : markRaw(rows.value.filter((r) => r.category === category.value))
+    selectedCategories.value.length === 0
+      ? rows.value
+      : markRaw(rows.value.filter((r) => selectedCategories.value.includes(r.category)))
   );
 
   const applyDrill = (list: readonly SkuResult[], skip: readonly DrillField[]) => {
@@ -78,7 +80,7 @@ export const useAnalysisStore = defineStore('analysis', () => {
     original.value = raw.value;
     removed.value = new Set();
     sourceLabel.value = label;
-    category.value = ALL_CATEGORIES;
+    selectedCategories.value = [];
     drill.value = {};
   }
 
@@ -122,8 +124,20 @@ export const useAnalysisStore = defineStore('analysis', () => {
     settings.value = sanitizeSettings({ ...settings.value, ...patch });
   }
 
-  function setCategory(next: string) {
-    category.value = next;
+  function setCategories(next: readonly string[]) {
+    const valid = new Set(categories.value);
+    selectedCategories.value = [...new Set(next)].filter((category) => valid.has(category));
+  }
+
+  function toggleCategory(category: string) {
+    const next = selectedCategories.value.includes(category)
+      ? selectedCategories.value.filter((value) => value !== category)
+      : [...selectedCategories.value, category];
+    setCategories(next);
+  }
+
+  function selectAllCategories() {
+    selectedCategories.value = [];
   }
 
   function setActionFilter(next: ActionGroup | 'all') {
@@ -156,8 +170,8 @@ export const useAnalysisStore = defineStore('analysis', () => {
   }
 
   return {
-    raw, original, removed, activeRaw, sourceLabel, settings, category, actionFilter, drill,
+    raw, original, removed, activeRaw, sourceLabel, settings, selectedCategories, actionFilter, drill,
     rows, hasData, categories, categoryRows, visibleRows, crossRows, matrixRows, hasDrill, editedIndexes, editedCount, removedCount, baselineRows,
-    setData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategory, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill
+    setData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategories, toggleCategory, selectAllCategories, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill
   };
 });
