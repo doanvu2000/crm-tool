@@ -15,4 +15,4 @@ Bản đồ kiến trúc gọn để đọc trước khi sửa code. Đọc theo
 - Đổi ngưỡng / rule nghiệp vụ → cập nhật `features/analysis.md` (mục Rules).
 - Không chép code vào index; chỉ ghi đường dẫn, trách nhiệm, quan hệ.
 
-Cập nhật lần cuối: 2026-10-01 (biểu đồ doanh thu lịch sử theo cửa hàng).
+Cập nhật lần cuối: 2026-10-01 (dùng dữ liệu tháng/cửa hàng chung cho biểu đồ và phân tích SKU).

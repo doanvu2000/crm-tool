@@ -14,6 +14,7 @@ const tiles = computed(() => {
   const p = palette.value;
   const n = rows.length;
   const revenue = sumBy(rows, (r) => r.revenue);
+  const gp = sumBy(rows, (r) => r.gp);
   const prevRevenue = sumBy(rows, (r) => r.prevRevenue);
   const classA = rows.filter((r) => r.abc === 'A');
   const core = rows.filter((r) => r.isCore);
@@ -23,7 +24,7 @@ const tiles = computed(() => {
   const share = (list: readonly SkuResult[]) => pct(revenue ? sumBy(list, (r) => r.revenue) / revenue : 0);
 
   return [
-    { label: 'Doanh thu', value: money(revenue), note: prevRevenue > 0 ? `${signedPct((revenue - prevRevenue) / prevRevenue)} so kỳ trước` : `GP ${money(sumBy(rows, (r) => r.gp))}`, color: p.ink },
+    { label: 'Doanh thu', value: money(revenue), note: `${prevRevenue > 0 ? `${signedPct((revenue - prevRevenue) / prevRevenue)} so tháng trước · ` : ''}GP ${money(gp)}`, color: p.ink },
     { label: 'Tổng SKU', value: fmt0(n), note: `${fmt0(new Set(rows.map((r) => r.category)).size)} ngành hàng`, color: p.muted },
     { label: 'SKU class A', value: fmt0(classA.length), note: `${share(classA)} doanh thu`, color: p.abc[0] },
     { label: 'Core SKU', value: fmt0(core.length), note: `${share(core)} doanh thu`, color: p.abc[1] },

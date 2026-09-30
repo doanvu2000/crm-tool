@@ -17,9 +17,9 @@ const onBasis = (e: Event) => store.updateSettings({ basis: (e.target as HTMLSel
           <p class="mt-0.5 text-xs text-ink-3">Doanh thu bán thực tế</p>
         </div>
         <div class="rounded-xl border border-line bg-sunken p-3" role="listitem">
-          <div class="eyebrow">Cửa sổ</div>
-          <div class="mt-1 text-sm font-semibold">8 tuần</div>
-          <p class="mt-0.5 text-xs text-ink-3">Rolling 56 ngày</p>
+          <div class="eyebrow">Kỳ phân tích</div>
+          <div class="mt-1 text-sm font-semibold">Tháng đã chọn</div>
+          <p class="mt-0.5 text-xs text-ink-3">So với tháng liền trước</p>
         </div>
         <div class="rounded-xl border border-line bg-sunken p-3" role="listitem">
           <div class="eyebrow">Phạm vi</div>

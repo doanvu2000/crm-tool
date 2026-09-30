@@ -61,6 +61,9 @@ function trendWhy(r: SkuResult) {
 
 export function traceSku(r: SkuResult, s: AnalysisSettings, categoryAds: number | null): TraceStep[] {
   const oosDays = r.days - r.sellingDays;
+  const periodLabel = r.storeCount && r.storeCount > 1
+    ? `${fmt0(r.storeCount)} cửa hàng, mỗi cửa hàng ${fmt0(r.days)} ngày`
+    : `${fmt0(r.days)} ngày`;
   const severe = r.oosRate > T.oos.critical;
   const before = r.cumShare - r.share;
   const ruleIndex = ACTION_RULES.findIndex((x) => x.id === r.rule);
@@ -69,12 +72,12 @@ export function traceSku(r: SkuResult, s: AnalysisSettings, categoryAds: number 
   return [
     {
       title: 'Kỳ bán hàng',
-      formula: `Kỳ ${r.days} ngày - ${fmt0(oosDays)} ngày OOS`,
+      formula: `Kỳ ${periodLabel} - ${fmt1(oosDays)} ngày OOS bình quân/cửa hàng`,
       result: `Selling Days = ${fmt0(r.sellingDays)}`
     },
     {
       title: 'ADS và tốc độ bán',
-      formula: `${fmt0(r.units)} sp / ${fmt0(r.sellingDays)} ngày`,
+      formula: `${fmt0(r.units)} sp / ${fmt0(r.sellingDays)} ngày bán gộp`,
       result: `ADS ${fmt1(r.ads)} sp/ngày. ${velocityWhy(r, s)} → ${r.velocity}`
     },
     {
@@ -98,7 +101,7 @@ export function traceSku(r: SkuResult, s: AnalysisSettings, categoryAds: number 
     },
     {
       title: 'OOS Rate',
-      formula: `${fmt0(oosDays)} ngày OOS / ${r.days} ngày`,
+      formula: `${fmt1(oosDays)} ngày OOS bình quân/cửa hàng / ${fmt0(r.days)} ngày`,
       result: `${oosWhy(r)} → ${r.oosStatus}`
     },
     {

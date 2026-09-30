@@ -3,7 +3,7 @@ import { normalizeKey } from '@/shared/lib/parse';
 import { useDebouncedRef } from '@/shared/composables/useDebouncedRef';
 import type { ActionGroup, SkuResult } from '@/features/analysis';
 
-export type SortKey = 'sku' | 'category' | 'abc' | 'revenue' | 'ads' | 'adsIndex' | 'stock' | 'dos' | 'oosRate' | 'growth' | 'group';
+export type SortKey = 'sku' | 'category' | 'abc' | 'revenue' | 'gp' | 'ads' | 'adsIndex' | 'stock' | 'dos' | 'oosRate' | 'growth' | 'group';
 
 const TEXT_KEYS: SortKey[] = ['sku', 'category', 'abc', 'group'];
 export const PAGE_SIZE = 25;

@@ -21,6 +21,7 @@ const COLUMNS: { key: SortKey; label: string; num?: boolean }[] = [
   { key: 'sku', label: 'SKU' },
   { key: 'abc', label: 'ABC' },
   { key: 'revenue', label: 'Doanh thu', num: true },
+  { key: 'gp', label: 'Lợi nhuận gộp', num: true },
   { key: 'ads', label: 'ADS', num: true },
   { key: 'adsIndex', label: 'Index', num: true },
   { key: 'stock', label: 'Tồn', num: true },
@@ -98,7 +99,7 @@ const sub = 'text-xs text-ink-3';
             </div>
             <div class="mt-0.5 truncate text-xs text-ink-3" :title="categoryPath(r)">{{ r.name }} · {{ categoryPath(r) }}</div>
           </div>
-          <span class="num flex-none text-right text-sm text-ink-2">{{ money(r.revenue) }}<span class="block text-xs text-ink-3">{{ signedPct(r.revenueGrowth, 0) }} kỳ trước</span></span>
+          <span class="num flex-none text-right text-sm text-ink-2">{{ money(r.revenue) }}<span class="block text-xs text-ink-3">{{ signedPct(r.revenueGrowth, 0) }} kỳ trước</span><span class="block text-xs text-ink-3">GP {{ money(r.gp) }}</span></span>
         </div>
         <div class="mt-2.5 flex items-center gap-1.5">
           <ColorDot :color="actionColor(r)" />
@@ -118,7 +119,7 @@ const sub = 'text-xs text-ink-3';
     </ul>
 
     <div class="hidden overflow-x-auto rounded-xl border border-line sm:block">
-      <table class="w-full min-w-[880px] border-collapse text-[13px]">
+      <table class="w-full min-w-[980px] border-collapse text-[13px]">
         <thead>
           <tr>
             <th
@@ -146,6 +147,7 @@ const sub = 'text-xs text-ink-3';
             </td>
             <td :class="cell"><span class="pill"><ColorDot :color="abcColor(r)" />{{ r.abc }}</span></td>
             <td :class="numCell" :title="`Kỳ trước ${money(r.prevRevenue)}${r.prevRevenueEstimated ? ' (ước tính)' : ''}`">{{ money(r.revenue) }}<div :class="[sub, 'font-sans']">{{ signedPct(r.revenueGrowth, 0) }} kỳ trước</div></td>
+            <td :class="numCell">{{ money(r.gp) }}</td>
             <td :class="numCell">{{ fmt1(r.ads) }}<div :class="[sub, 'font-sans']">{{ r.velocity }}</div></td>
             <td :class="numCell">{{ pct(r.adsIndex, 0) }}</td>
             <td :class="numCell">{{ fmt0(r.stock) }}</td>

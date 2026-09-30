@@ -41,7 +41,7 @@ async function handleFile(file?: File | null) {
   try {
     const rows = mapMonthlySales(await readSheet(file));
     store.setData(rows, file.name);
-    status.value = { text: `Đã nạp ${fmt0(rows.length)} dòng từ ${file.name}.`, error: false };
+    status.value = { text: `Đã nạp ${fmt0(rows.length)} dòng, ${fmt0(store.stores.length)} cửa hàng từ ${file.name}.`, error: false };
   } catch (error) {
     status.value = {
       text: error instanceof MonthlySalesImportError ? error.message : 'Không đọc được file. Kiểm tra file rồi thử lại.',
@@ -128,7 +128,7 @@ const config = computed<ChartConfiguration<'line'>>(() => {
 
 <template>
   <section id="monthly-sales" class="scroll-mt-40" aria-label="Doanh thu theo tháng">
-    <BaseCard title="Doanh thu theo tháng" :subtitle="store.hasData ? `${periodLabel} · ${fmt0(store.rows.length)} dòng dữ liệu` : 'Theo dõi doanh thu từ tháng 3 đến hiện tại, tách theo cửa hàng.'">
+    <BaseCard data-tour="import" eyebrow="Bước 1" title="Dữ liệu bán hàng theo tháng" :subtitle="store.hasData ? `${periodLabel} · ${fmt0(store.rows.length)} dòng · cùng một dữ liệu cho biểu đồ và bảng phân tích.` : 'Nhập một file theo tháng, mã SKU và cửa hàng. Phần phân tích và biểu đồ sẽ dùng chung dữ liệu này.'">
       <div class="mt-3 flex flex-wrap items-center gap-2">
         <label
           for="monthly-sales-file"
@@ -152,8 +152,15 @@ const config = computed<ChartConfiguration<'line'>>(() => {
       <p class="mt-2 min-h-5 text-[13px]" :class="status.error ? 'text-ink' : 'text-ink-2'" :role="status.error ? 'alert' : 'status'" aria-live="polite">{{ status.text }}</p>
 
       <template v-if="store.hasData">
+        <div class="mt-3 max-w-sm">
+          <label for="monthly-analysis-month" class="field-label">Tháng dùng cho các bảng phân tích</label>
+          <select id="monthly-analysis-month" class="control mt-1" :value="store.selectedMonth" @change="store.setMonth(($event.target as HTMLSelectElement).value)">
+            <option v-for="month in store.months.slice().reverse()" :key="month" :value="month">{{ formatMonth(month) }}</option>
+          </select>
+          <p class="mt-1 text-xs text-ink-3">So sánh với tháng liền trước; biểu đồ vẫn hiển thị toàn bộ lịch sử.</p>
+        </div>
         <fieldset class="mt-3 rounded-xl border border-line bg-sunken/50 p-3">
-          <legend class="px-1 text-sm font-semibold">Cửa hàng ({{ selectedCount }}/{{ store.stores.length }})</legend>
+          <legend class="px-1 text-sm font-semibold">Cửa hàng áp dụng cho biểu đồ và các bảng ({{ selectedCount }}/{{ store.stores.length }})</legend>
           <div class="mb-2 flex flex-wrap gap-2">
             <button type="button" class="btn" @click="store.selectAllStores">Chọn tất cả</button>
             <button type="button" class="btn" @click="store.clearStores">Bỏ chọn</button>
@@ -194,7 +201,9 @@ const config = computed<ChartConfiguration<'line'>>(() => {
         </template>
       </template>
       <div v-else class="mt-2 rounded-xl border border-dashed border-line bg-sunken/50 px-4 py-8 text-center text-sm text-ink-2">
-        Tải file gồm các cột <code class="rounded bg-sunken px-1 font-mono text-xs text-ink">month, store, sku, revenue, units</code> để bắt đầu.
+        <p>Tải file gồm một dòng cho mỗi mã ở mỗi cửa hàng và tháng.</p>
+        <p class="mt-2 text-xs">Bắt buộc: <code class="rounded bg-sunken px-1 font-mono text-ink">month, store, sku, category, revenue, units, gp, stock, oos_days</code></p>
+        <p class="mt-1 text-xs">Tuỳ chọn: <code class="rounded bg-sunken px-1 font-mono text-ink">name, subcat1, subcat2, lifecycle, seasonal</code></p>
       </div>
     </BaseCard>
   </section>

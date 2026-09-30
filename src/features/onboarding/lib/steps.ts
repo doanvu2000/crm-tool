@@ -11,19 +11,13 @@ export const TOUR_STEPS: Record<TourPhase, TourStep[]> = {
   intro: [
     {
       target: 'import',
-      title: 'Nhập file SKU',
-      body: 'Kéo thả file CSV hoặc Excel vào khung này, mỗi dòng là 1 SKU. Chưa rõ định dạng thì bấm "Tải file mẫu CSV". File chỉ đọc trên máy bạn, không gửi đi đâu.'
+      title: 'Nhập dữ liệu bán hàng',
+      body: 'Tải một file CSV hoặc Excel, mỗi dòng là một mã SKU tại một cửa hàng trong một tháng. Dùng file mẫu để chuẩn bị đủ doanh thu, số lượng, lợi nhuận, tồn kho và ngày OOS.'
     },
     {
       target: 'settings',
       title: 'Chọn cách phân tích',
-      body: 'ABC theo doanh thu, GP hay số lượng bán; kỳ báo cáo và ngưỡng A/B. Đổi ở đây, mọi kết quả tính lại ngay.'
-    },
-    {
-      target: 'sample',
-      title: 'Chưa có file? Thử dữ liệu mẫu',
-      body: '80 SKU của 4 ngành hàng. Có dữ liệu rồi, hướng dẫn chỉ tiếp các phần của báo cáo.',
-      cta: 'Dùng dữ liệu mẫu'
+      body: 'ABC luôn xếp theo doanh thu của tháng đã chọn. Chọn ADS tuyệt đối hoặc ADS Index để phân loại tốc độ bán.'
     }
   ],
   data: [

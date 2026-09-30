@@ -14,8 +14,8 @@ const rules = computed(() => {
   const s = props.settings;
   return [
     { title: 'ABC', text: abcRule(s, store.rows.length) },
-    { title: 'Chu kỳ review', text: 'Cập nhật mỗi tháng một lần, dùng rolling 8 tuần gần nhất. Không đổi listing chỉ vì SKU thay đổi ABC trong một kỳ.' },
-    { title: 'ADS', text: `Units Sold / Selling Days. Selling Days = kỳ ${s.periodDays} ngày trừ số ngày OOS, nên ADS đã loại ảnh hưởng thiếu hàng.` },
+    { title: 'Chu kỳ review', text: 'Chọn một tháng để xem doanh số, tồn kho và Action của tháng đó; số liệu kỳ trước lấy từ tháng liền trước. Không đổi listing chỉ vì SKU thay đổi ABC trong một kỳ.' },
+    { title: 'ADS', text: 'Units Sold được cộng theo cửa hàng; Selling Days là số ngày trong tháng trừ OOS days bình quân của các cửa hàng có SKU.' },
     { title: 'ADS Index', text: 'SKU ADS / ADS trung bình của ngành hàng.' },
     { title: 'Tốc độ bán', text: velocityRule(s) },
     { title: 'Core SKU', text: coreRule() },

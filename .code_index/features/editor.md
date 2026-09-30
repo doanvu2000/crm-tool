@@ -1,6 +1,6 @@
 # features/editor
 
-Xem và sửa dữ liệu đầu vào sau khi import, kết quả tính lại ngay. Public API: `InputEditorSection`, `exportInputCsv`.
+Xem và sửa snapshot SKU của tháng/cửa hàng đang chọn sau khi chuyển dữ liệu tháng sang engine phân tích, kết quả tính lại ngay. Thay đổi ở đây là chỉnh sửa phân tích hiện tại; nguồn lịch sử vẫn là file trong `monthly-sales`. Public API: `InputEditorSection`, `exportInputCsv`.
 
 | File | Trách nhiệm |
 |---|---|

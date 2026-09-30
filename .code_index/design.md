@@ -50,6 +50,6 @@ Biểu đồ doanh thu theo cửa hàng dùng bảng màu chuỗi `series` trong
 ## Layout
 
 Mọi màn: 1 cột full width (không còn rail trái, để bảng nhiều cột đủ chỗ). `SectionNav` variant bar sticky dưới header (top-16), desktop wrap nhiều dòng, mobile cuộn ngang. `DrillBar` nằm trong cùng thanh sticky. Section dùng `scroll-mt-40`, `[data-tour]` scroll-margin 10rem. Nút `ScrollTopButton` (App.vue) hiện khi cuộn > 600px.
-Thứ tự: Dữ liệu (#data) → Quyết định (#dashboard) → Tổng quan (KPI + #compare) → Đóng góp → Tồn kho → Chi tiết Action → Dữ liệu đầu vào (#input) → Quy tắc.
+Thứ tự: Nguồn dữ liệu tháng và chart (#data / #monthly-sales) → Quyết định (#dashboard) → Tổng quan (KPI + #compare) → Đóng góp → Tồn kho → Chi tiết Action → Dữ liệu đầu vào (#input) → Quy tắc.
 `[data-tour]` có `scroll-margin-top: 7rem`.
 Section cần `id` + `scroll-mt-24` để mục lục và header sticky khớp.

@@ -1,6 +1,6 @@
 # Overview
 
-SPA tĩnh phân tích SKU (ABC, ADS, DOS, OOS, Growth, Core SKU, Action) từ file CSV/Excel.
+SPA tĩnh phân tích SKU (ABC, ADS, DOS, OOS, Growth, Core SKU, Action) từ một file CSV/Excel theo tháng, cửa hàng và SKU.
 Toàn bộ xử lý chạy trên trình duyệt, không có backend. Nghiệp vụ gốc: `Nguyên tắc xây  dựng Analysis.md`.
 
 ## Stack
@@ -38,11 +38,11 @@ src/
 ├── features/               feature-first, mỗi feature có index.ts (public API)
 │   ├── analysis/           DOMAIN: types, thresholds, engine thuần, Pinia store
 │   ├── import/             đọc file, map cột ngành hàng/Subcat 1/2, dữ liệu mẫu, file mẫu CSV
-│   ├── settings/           chuẩn ABC CVS (Sales, rolling 8 tuần, 70/90 theo ngành) + basis bổ sung cho business rule
+│   ├── settings/           chuẩn ABC CVS theo tháng, ngưỡng 70/90 theo ngành + basis ADS bổ sung cho business rule
 │   ├── overview/           lọc phân cấp ngành hàng → Subcat 1/2 + KPI tiles + so với kỳ trước
 │   ├── contribution/       Pareto, cơ cấu ABC, ma trận ABC x Velocity, Exception
 │   ├── inventory/          phân bố Velocity/DOS/OOS/Trend + scatter DOS x Growth
-│   ├── monthly-sales/      nhập dữ liệu lịch sử theo tháng + biểu đồ doanh thu theo cửa hàng
+│   ├── monthly-sales/      nhập nguồn dữ liệu chung, lọc tháng/cửa hàng, tạo dữ liệu phân tích + biểu đồ doanh thu
 │   ├── actions/            phân bổ Action + bảng SKU (lọc/sort/trang/xuất CSV)
 │   ├── editor/             bảng sửa dữ liệu đầu vào realtime + dải tác động Action
 │   ├── onboarding/         tour highlight hướng dẫn lần đầu (2 phase: intro, data)
