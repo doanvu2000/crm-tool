@@ -27,7 +27,7 @@ const C = THRESHOLDS.core;
 </script>
 
 <template>
-  <BaseCard title="Ma trận ABC x Tốc độ bán" subtitle="Số SKU mỗi ô. Viền vàng: vùng ứng viên Core SKU">
+  <BaseCard title="Ma trận ABC x Tốc độ bán" subtitle="Số SKU mỗi ô. Viền xanh ngọc: vùng ứng viên Core SKU">
     <div>
       <table class="w-full table-fixed border-separate border-spacing-1 text-[13px]">
         <thead>

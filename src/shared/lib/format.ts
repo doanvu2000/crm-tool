@@ -17,3 +17,9 @@ export function money(v: Num) {
   if (abs >= 1e6) return nf1.format(v / 1e6) + ' tr';
   return nf0.format(v);
 }
+
+const sign = (v: number) => (v > 0 ? '+' : v < 0 ? '−' : '');
+
+export const signedPct = (v: Num, digits = 1) => (valid(v) ? sign(v) + pct(Math.abs(v), digits) : '-');
+export const signedMoney = (v: Num) => (valid(v) ? sign(Math.round(v)) + money(Math.abs(v)) : '-');
+export const signedFmt0 = (v: Num) => (valid(v) ? sign(Math.round(v)) + fmt0(Math.abs(v)) : '-');

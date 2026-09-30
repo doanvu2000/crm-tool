@@ -29,7 +29,7 @@ const onBasis = (e: Event) => store.updateSettings({ basis: (e.target as HTMLSel
 </script>
 
 <template>
-  <BaseCard eyebrow="Bước 2" title="Thiết lập phân tích" subtitle="Ngưỡng hiện là baseline Pilot, hiệu chỉnh theo từng ngành hàng.">
+  <BaseCard data-tour="settings" eyebrow="Bước 2" title="Thiết lập phân tích" subtitle="Ngưỡng hiện là baseline Pilot, hiệu chỉnh theo từng ngành hàng.">
     <div class="grid gap-3">
       <div class="grid gap-1">
         <label for="abc-metric" class="field-label">ABC theo chỉ số</label>

@@ -65,7 +65,7 @@ function useSample() {
 </script>
 
 <template>
-  <BaseCard eyebrow="Bước 1" title="Nhập dữ liệu SKU" subtitle="File CSV hoặc Excel, mỗi dòng là 1 SKU trong cùng 1 kỳ. File chỉ đọc trên máy, không gửi đi đâu.">
+  <BaseCard data-tour="import" eyebrow="Bước 1" title="Nhập dữ liệu SKU" subtitle="File CSV hoặc Excel, mỗi dòng là 1 SKU trong cùng 1 kỳ. File chỉ đọc trên máy, không gửi đi đâu.">
     <label
       for="file-input"
       class="flex min-h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-5 text-center transition-colors has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-focus"
@@ -85,13 +85,18 @@ function useSample() {
     </label>
 
     <div class="mt-3 flex flex-wrap gap-2">
-      <button type="button" class="btn btn-primary" :disabled="loading" @click="useSample">
+      <button type="button" class="btn btn-primary" data-tour="sample" :disabled="loading" @click="useSample">
         <AppIcon name="arrow-right" class="size-4" />
         Dùng dữ liệu mẫu
       </button>
       <button type="button" class="btn" @click="downloadTemplate">
         <AppIcon name="download" class="size-4" />
         Tải file mẫu CSV
+      </button>
+      <button v-if="store.hasData" type="button" class="btn" @click="scrollToSection('input')">
+        <AppIcon name="edit" class="size-4" />
+        Xem và sửa dữ liệu
+        <span v-if="store.editedCount" class="num text-xs text-edit">{{ fmt0(store.editedCount) }} đã sửa</span>
       </button>
     </div>
 

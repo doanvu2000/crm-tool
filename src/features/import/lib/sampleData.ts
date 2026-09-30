@@ -31,14 +31,17 @@ export function generateSampleData(perCategory = 20, seed = 20260930): SkuInput[
       const oosDays = rnd() < 0.7 ? Math.floor(rnd() * 2) : Math.floor(rnd() * 11);
       const ads = units / Math.max(1, 30 - oosDays);
       const lifecycle: Lifecycle = rnd() < 0.06 ? 'New' : rnd() < 0.06 ? 'EOL' : 'Active';
+      const unitsPrev = lifecycle === 'New' ? 0 : Math.round(units * (0.55 + rnd() * 0.9));
+      const prevPrice = Math.round(price * (0.92 + rnd() * 0.14));
       out.push({
         sku: 'SKU' + String(i).padStart(4, '0'),
         name: `${names[j % names.length]} ${SIZES[j % SIZES.length]}`,
         category,
         revenue: units * price,
+        revenuePrev: unitsPrev * prevPrice,
         gp: Math.round(units * price * (0.12 + rnd() * 0.23)),
         units,
-        unitsPrev: lifecycle === 'New' ? 0 : Math.round(units * (0.55 + rnd() * 0.9)),
+        unitsPrev,
         oosDays,
         stock: Math.round(ads * DOS_POOL[Math.floor(rnd() * DOS_POOL.length)] * (0.8 + rnd() * 0.4)),
         lifecycle,

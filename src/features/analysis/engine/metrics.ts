@@ -13,7 +13,27 @@ export function computeBaseMetrics(r: SkuInput, periodDays: number): BaseMetrics
   const demandBase = oosRate > THRESHOLDS.oos.critical ? expectedDemand : r.units;
   const growth = r.unitsPrev > 0 ? (demandBase - r.unitsPrev) / r.unitsPrev : null;
   const dos = ads > 0 ? r.stock / ads : r.stock > 0 ? Infinity : null;
-  return { days, sellingDays, ads, oosRate, expectedDemand, growth, dos };
+  return { days, sellingDays, ads, oosRate, expectedDemand, growth, dos, ...comparePrevious(r) };
+}
+
+export function comparePrevious(r: SkuInput) {
+  const price = r.units > 0 ? r.revenue / r.units : 0;
+  const prevRevenueEstimated = !(r.revenuePrev > 0) && r.unitsPrev > 0;
+  const prevRevenue = r.revenuePrev > 0 ? r.revenuePrev : prevRevenueEstimated ? r.unitsPrev * price : 0;
+  const prevPrice = r.unitsPrev > 0 ? prevRevenue / r.unitsPrev : price;
+  const unitsDelta = r.units - r.unitsPrev;
+  const revenueDelta = r.revenue - prevRevenue;
+  const volumeEffect = unitsDelta * prevPrice;
+  return {
+    prevRevenue,
+    prevRevenueEstimated,
+    unitsDelta,
+    unitsChange: r.unitsPrev > 0 ? unitsDelta / r.unitsPrev : null,
+    revenueDelta,
+    revenueGrowth: prevRevenue > 0 ? revenueDelta / prevRevenue : null,
+    volumeEffect,
+    priceEffect: revenueDelta - volumeEffect
+  };
 }
 
 /** ADS trung bình theo ngành hàng, mẫu số của ADS Index. */

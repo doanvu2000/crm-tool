@@ -4,9 +4,11 @@ import { storeToRefs } from 'pinia';
 import { useAnalysisStore, type ActionGroup } from '@/features/analysis';
 import { ActionSection } from '@/features/actions';
 import { ContributionSection } from '@/features/contribution';
+import { InputEditorSection } from '@/features/editor';
 import { ImportPanel } from '@/features/import';
 import { InventorySection } from '@/features/inventory';
-import { CategoryFilter, DecisionHero, KpiGrid } from '@/features/overview';
+import { TourOverlay } from '@/features/onboarding';
+import { CategoryFilter, DecisionHero, KpiGrid, PeriodCompare } from '@/features/overview';
 import { RulesPanel } from '@/features/rules';
 import { SettingsPanel } from '@/features/settings';
 import { fmt0 } from '@/shared/lib/format';
@@ -16,7 +18,7 @@ import SectionHeader from '@/shared/ui/SectionHeader.vue';
 import SectionNav from '@/shared/ui/SectionNav.vue';
 
 const store = useAnalysisStore();
-const { hasData, visibleRows, settings, sourceLabel, actionFilter } = storeToRefs(store);
+const { hasData, visibleRows, settings, sourceLabel, actionFilter, editedCount } = storeToRefs(store);
 
 // Thứ tự phải khớp thứ tự trên trang để mục lục tô đúng mục đang đọc.
 const navItems = computed(() => [
@@ -26,6 +28,7 @@ const navItems = computed(() => [
   { id: 'contribution', label: 'Đóng góp' },
   { id: 'inventory', label: 'Tồn kho' },
   { id: 'actions', label: 'Chi tiết Action' },
+  { id: 'input', label: 'Dữ liệu đầu vào', meta: editedCount.value ? `${fmt0(editedCount.value)} sửa` : undefined },
   { id: 'rules', label: 'Quy tắc' }
 ]);
 
@@ -39,7 +42,7 @@ async function pickGroup(group: ActionGroup) {
 <template>
   <div class="lg:grid lg:grid-cols-[184px_minmax(0,1fr)] lg:gap-8">
     <aside class="hidden lg:block">
-      <div class="sticky top-24">
+      <div class="sticky top-24" data-tour="nav">
         <SectionNav v-if="hasData" :items="navItems" />
       </div>
     </aside>
@@ -48,7 +51,7 @@ async function pickGroup(group: ActionGroup) {
       <h1 class="sr-only">Phân tích SKU và đề xuất PO</h1>
 
       <div v-if="hasData" class="sticky top-16 z-20 -mx-4 mb-4 border-b border-line bg-canvas/90 px-4 py-2 backdrop-blur-md lg:hidden">
-        <SectionNav :items="navItems" variant="bar" />
+        <SectionNav :items="navItems" variant="bar" data-tour="nav" />
       </div>
 
       <section id="data" class="scroll-mt-36 lg:scroll-mt-24" aria-labelledby="data-title">
@@ -69,22 +72,25 @@ async function pickGroup(group: ActionGroup) {
 
       <template v-else>
         <div id="dashboard" class="mt-6 scroll-mt-36 lg:scroll-mt-24">
-          <DecisionHero :rows="visibleRows" :period-days="settings.periodDays" :source="sourceLabel" @pick="pickGroup" />
+          <DecisionHero data-tour="decision" :rows="visibleRows" :period-days="settings.periodDays" :source="sourceLabel" @pick="pickGroup" />
           <div class="mt-4">
-            <CategoryFilter />
+            <CategoryFilter data-tour="category" />
           </div>
         </div>
 
         <section id="overview" class="scroll-mt-36 lg:scroll-mt-24" aria-label="Tổng quan">
           <SectionHeader title="Tổng quan" :hint="`${fmt0(visibleRows.length)} SKU đang xem`" />
           <KpiGrid :rows="visibleRows" />
+          <PeriodCompare id="compare" data-tour="compare" :rows="visibleRows" class="mt-4" />
         </section>
 
         <ContributionSection id="contribution" class="scroll-mt-36 lg:scroll-mt-24" :rows="visibleRows" :metric="settings.metric" />
         <InventorySection id="inventory" class="scroll-mt-36 lg:scroll-mt-24" :rows="visibleRows" :basis="settings.basis" />
         <ActionSection id="actions" class="scroll-mt-36 lg:scroll-mt-24" :rows="visibleRows" />
+        <InputEditorSection id="input" class="scroll-mt-36 lg:scroll-mt-24" />
         <RulesPanel id="rules" class="scroll-mt-36 lg:scroll-mt-24" :settings="settings" />
       </template>
     </div>
   </div>
+  <TourOverlay />
 </template>

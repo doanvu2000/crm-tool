@@ -15,4 +15,4 @@ Bản đồ kiến trúc gọn để đọc trước khi sửa code. Đọc theo
 - Đổi ngưỡng / rule nghiệp vụ → cập nhật `features/analysis.md` (mục Rules).
 - Không chép code vào index; chỉ ghi đường dẫn, trách nhiệm, quan hệ.
 
-Cập nhật lần cuối: 2026-09-30.
+Cập nhật lần cuối: 2026-09-30 (thêm editor, onboarding, so với kỳ trước).

@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { useTour } from '@/features/onboarding';
 import { useTheme } from '@/shared/composables/useTheme';
 import AppIcon from '@/shared/ui/AppIcon.vue';
 
 const { isDark, toggleTheme } = useTheme();
+const { restart } = useTour();
 </script>
 
 <template>
@@ -19,6 +21,11 @@ const { isDark, toggleTheme } = useTheme();
           <span class="eyebrow hidden truncate sm:block">Quyết định PO theo ABC · DOS · OOS</span>
         </span>
       </a>
+      <div class="flex flex-none items-center gap-2">
+      <button type="button" data-tour="help" class="btn min-h-10 rounded-full bg-surface px-3.5" aria-label="Xem hướng dẫn sử dụng" @click="restart">
+        <AppIcon name="help" class="size-[18px]" />
+        <span class="hidden sm:inline">Hướng dẫn</span>
+      </button>
       <button
         type="button"
         class="btn min-h-10 rounded-full bg-surface px-3.5"
@@ -28,6 +35,7 @@ const { isDark, toggleTheme } = useTheme();
         <AppIcon :name="isDark ? 'sun' : 'moon'" class="size-[18px]" />
         <span class="hidden sm:inline">{{ isDark ? 'Giao diện sáng' : 'Giao diện tối' }}</span>
       </button>
+      </div>
     </div>
   </header>
 </template>

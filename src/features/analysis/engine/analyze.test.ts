@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { analyzeSkus } from './analyze';
 import { assignAbc } from './abc';
+import { comparePrevious } from './metrics';
 import { dosStatus, oosStatus, trendStatus, velocityByAds } from './classify';
 import { DEFAULT_SETTINGS } from '../model/thresholds';
 import type { SkuInput } from '../model/types';
@@ -10,6 +11,7 @@ const sku = (over: Partial<SkuInput>): SkuInput => ({
   name: '',
   category: 'Cat',
   revenue: 100,
+  revenuePrev: 0,
   gp: 20,
   units: 300,
   unitsPrev: 300,
@@ -80,5 +82,33 @@ describe('analyzeSkus', () => {
     const [r] = analyzeSkus([sku({ units: 0, unitsPrev: 10, stock: 100 })], DEFAULT_SETTINGS);
     expect(r.dos).toBe(Infinity);
     expect(r.group).toBe('Stop PO / Xả hàng');
+  });
+});
+
+describe('so với kỳ trước', () => {
+  it('thiếu doanh thu kỳ trước thì ước tính theo giá kỳ này, toàn bộ thay đổi do số lượng', () => {
+    const c = comparePrevious(sku({ revenue: 1000, units: 100, unitsPrev: 120 }));
+    expect(c.prevRevenueEstimated).toBe(true);
+    expect(c.prevRevenue).toBe(1200);
+    expect(c.revenueDelta).toBe(-200);
+    expect(c.unitsChange).toBeCloseTo(-1 / 6);
+    expect(c.volumeEffect).toBe(-200);
+    expect(c.priceEffect).toBe(0);
+  });
+
+  it('có doanh thu kỳ trước thì tách thay đổi do số lượng và do giá', () => {
+    const c = comparePrevious(sku({ revenue: 1100, revenuePrev: 1200, units: 100, unitsPrev: 120 }));
+    expect(c.prevRevenueEstimated).toBe(false);
+    expect(c.revenueDelta).toBe(-100);
+    expect(c.revenueGrowth).toBeCloseTo(-100 / 1200);
+    expect(c.volumeEffect).toBe(-200);
+    expect(c.priceEffect).toBe(100);
+  });
+
+  it('SKU mới không có kỳ trước', () => {
+    const c = comparePrevious(sku({ revenue: 500, units: 50, unitsPrev: 0 }));
+    expect(c.prevRevenue).toBe(0);
+    expect(c.revenueGrowth).toBeNull();
+    expect(c.unitsChange).toBeNull();
   });
 });

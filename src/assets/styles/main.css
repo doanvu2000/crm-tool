@@ -7,16 +7,17 @@
   --font-sans: "Google Sans", "Google Sans Flex", "Product Sans", Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "Google Sans Code", ui-monospace, "Cascadia Mono", Consolas, monospace;
 
-  --color-canvas: #edf0f3;
+  --color-canvas: #f7f9fc;
   --color-surface: #ffffff;
-  --color-sunken: #f4f6f8;
-  --color-line: #d9dfe5;
-  --color-ink: #111b24;
+  --color-sunken: #f0f4f8;
+  --color-line: #dfe5ec;
+  --color-ink: #0f1b2a;
   --color-ink-2: #4a5866;
   --color-ink-3: #5f6c78;
-  --color-tag: #f6c522;
-  --color-tag-ink: #1a1400;
+  --color-tag: #14b8a6;
+  --color-tag-ink: #042f2e;
   --color-focus: #1d4ed8;
+  --color-edit: #db2777;
 }
 
 @layer base {
@@ -28,9 +29,10 @@
     --color-ink: #e8edf2;
     --color-ink-2: #a9b6c3;
     --color-ink-3: #8b99a7;
-    --color-tag: #ffd23a;
-    --color-tag-ink: #1a1400;
+    --color-tag: #2dd4bf;
+    --color-tag-ink: #042f2e;
     --color-focus: #93c5fd;
+    --color-edit: #f472b6;
   }
 
   html { -webkit-text-size-adjust: 100%; color-scheme: light; }
@@ -39,6 +41,7 @@
   :focus-visible { @apply rounded-md outline-2 outline-offset-2 outline-focus; }
   button:not(:disabled), [role="button"]:not(:disabled), summary { cursor: pointer; }
   button, a, summary, label { touch-action: manipulation; }
+  [data-tour] { scroll-margin-top: 7rem; }
   ::selection { @apply bg-tag text-tag-ink; }
 }
 
@@ -66,6 +69,16 @@
 @keyframes strip-grow {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
+}
+
+@keyframes tour-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cell-flash {
+  from { background-color: color-mix(in oklab, var(--color-edit) 22%, transparent); }
+  to { background-color: transparent; }
 }
 
 @media (prefers-reduced-motion: reduce) {

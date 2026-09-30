@@ -23,6 +23,7 @@ export interface SkuInput {
   name: string;
   category: string;
   revenue: number;
+  revenuePrev: number;
   gp: number;
   units: number;
   unitsPrev: number;
@@ -50,6 +51,14 @@ export interface BaseMetrics {
   oosRate: number;
   expectedDemand: number;
   growth: number | null;
+  prevRevenue: number;
+  prevRevenueEstimated: boolean;
+  unitsDelta: number;
+  unitsChange: number | null;
+  revenueDelta: number;
+  revenueGrowth: number | null;
+  volumeEffect: number;
+  priceEffect: number;
   /** Infinity = còn tồn nhưng không bán; null = không bán, không tồn. */
   dos: number | null;
 }

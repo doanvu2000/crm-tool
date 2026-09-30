@@ -11,5 +11,6 @@
 | `lib/sampleData.ts` | `generateSampleData(perCategory, seed)` PRNG mulberry32, 4 ngành |
 | `lib/template.ts` | `downloadTemplate` |
 
-Cột bắt buộc: sku, revenue, units, unitsPrev, stock. Alias so khớp sau `normalizeKey` (bỏ dấu, lowercase).
+Cột bắt buộc: sku, revenue, units, unitsPrev, stock. `revenuePrev` (`revenue_prev`) tuỳ chọn: thiếu thì engine ước tính.
+`ImportPanel`: nút `data-tour="sample"`, card `data-tour="import"`, có dữ liệu thì hiện nút "Xem và sửa dữ liệu" cuộn tới #input. Alias so khớp sau `normalizeKey` (bỏ dấu, lowercase).
 Thêm cột: thêm entry vào `COLUMNS` + field trong `SkuInput` + map trong `mapRows`.

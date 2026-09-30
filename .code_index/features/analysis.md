@@ -8,14 +8,14 @@ Trái tim nghiệp vụ. Engine thuần TS + Pinia store. Public API: `features/
 |---|---|
 | `model/types.ts` | Hằng thứ tự (`ABC_CLASSES`, `VELOCITY_LEVELS`, `DOS_LEVELS`, `OOS_LEVELS`, `TREND_LEVELS`, `ACTION_GROUPS`, `LIFECYCLES`) + type `SkuInput`, `AnalysisSettings`, `BaseMetrics`, `AbcAssignment`, `Classification`, `ActionDecision`, `SkuContext`, `SkuResult` |
 | `model/thresholds.ts` | `THRESHOLDS` (mọi ngưỡng Pilot), `DEFAULT_SETTINGS`, `sanitizeSettings` |
-| `engine/metrics.ts` | `computeBaseMetrics`, `categoryAverageAds` |
+| `engine/metrics.ts` | `computeBaseMetrics`, `comparePrevious`, `categoryAverageAds` |
 | `engine/abc.ts` | `metricValue`, `assignAbc` |
 | `engine/classify.ts` | `velocityByAds`, `velocityByIndex`, `dosStatus`, `oosStatus`, `trendStatus`, `isCoreSku` |
 | `engine/actions.ts` | `decideAction` (rule engine) |
 | `engine/analyze.ts` | `analyzeSkus` pipeline |
 | `engine/aggregate.ts` | `countBy`, `sumBy` |
 | `engine/analyze.test.ts` | Vitest cho biên ngưỡng, ABC, Severe OOS, EOL, Core, Overstock |
-| `store/analysisStore.ts` | `useAnalysisStore` (state: raw, sourceLabel, settings, category, actionFilter; actions: setData, updateSettings, setCategory, setActionFilter), `ALL_CATEGORIES` |
+| `store/analysisStore.ts` | `useAnalysisStore` (state: raw, original, sourceLabel, settings, category, actionFilter; getters: rows, visibleRows, editedIndexes, editedCount, baselineRows; actions: setData, updateRow, resetRow, resetAll, updateSettings, setCategory, setActionFilter), `ALL_CATEGORIES` |
 
 ## Rules (theo `Nguyên tắc xây  dựng Analysis.md`, kèm cách hiểu đã chốt)
 
@@ -27,6 +27,8 @@ Trái tim nghiệp vụ. Engine thuần TS + Pinia store. Public API: `features/
 - Core: A + ADS ≥ 20 + Index ≥ 70% + OOS ≤ 10% + không EOL.
 - DOS: ≤7, ≤15, ≤30, ≤60, ≤90, >90. ADS = 0 và còn tồn → Infinity (Overstock); không tồn → N/A.
 - OOS > 20%: Growth so kỳ trước bằng nhu cầu dự kiến (ADS x days).
+- Kỳ trước: prevRevenue = revenuePrev, thiếu (≤ 0) mà có unitsPrev thì = unitsPrev x giá kỳ này (`prevRevenueEstimated`).
+  volumeEffect = (units - unitsPrev) x giá kỳ trước; priceEffect = revenueDelta - volumeEffect. Ước tính thì priceEffect = 0.
 - isNew = lifecycle New hoặc (unitsPrev = 0 và units > 0).
 - Thứ tự Action: EOL → New → Seasonal → Severe OOS → switch DOS (N/A, Critical Low, Low, Overstock, Excess, High, Healthy).
 - Nhóm Action: Tăng PO, Duy trì, Giảm PO, Stop PO / Xả hàng, Review. Mỗi nhánh trả `reasons[]`.

@@ -38,6 +38,7 @@ export function mapRows(json: Record<string, unknown>[]): SkuInput[] {
       name: String(get(row, 'name') ?? '').trim(),
       category: map.has('category') ? String(get(row, 'category') ?? '').trim() || 'Khác' : 'Chung',
       revenue: parseNum(get(row, 'revenue')),
+      revenuePrev: parseNum(get(row, 'revenuePrev')),
       gp: parseNum(get(row, 'gp')),
       units: parseNum(get(row, 'units')),
       unitsPrev: parseNum(get(row, 'unitsPrev')),

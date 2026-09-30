@@ -8,13 +8,14 @@ Tất cả nhận `rows: readonly SkuResult[]` (đã lọc ngành) từ `pages/S
 ## overview
 - `components/DecisionHero.vue`: thẻ quyết định (điểm nhấn), emit `pick(group)` → page set `store.actionFilter` + cuộn tới #actions.
 - `components/CategoryFilter.vue`: chip ngành, `store.setCategory`.
-- `components/KpiGrid.vue`: 6 tile (Doanh thu, Tổng SKU, SKU class A, Core, Dư tồn DOS > 60, OOS TB).
+- `components/KpiGrid.vue`: 6 tile (Doanh thu + % so kỳ trước, Tổng SKU, SKU class A, Core, Dư tồn DOS > 60, OOS TB).
+- `components/PeriodCompare.vue` (#compare): số lượng + doanh thu kỳ trước → kỳ này, tách thay đổi doanh thu do số lượng / do giá, bảng theo ngành, top 5 SKU giảm doanh thu.
 
 ## contribution
 - `components/ContributionSection.vue`: layout 12 cột.
 - `ParetoChart.vue`: bar tích luỹ %, màu theo class ABC, 1 trục (không dual axis).
 - `AbcMixChart.vue`: % số SKU vs % đóng góp.
-- `AbcVelocityMatrix.vue`: bảng heat ABC x Velocity, ô A-Fast viền vàng (`outline-tag`).
+- `AbcVelocityMatrix.vue`: bảng heat ABC x Velocity, ô A-Fast viền teal (`outline-tag`).
 - `ExceptionsPanel.vue`: New / EOL / Seasonal / Severe OOS.
 
 ## inventory
@@ -23,9 +24,9 @@ Tất cả nhận `rows: readonly SkuResult[]` (đã lọc ngành) từ `pages/S
 
 ## actions
 - `components/ActionSection.vue`: `CountBarChart` ngang full width, `SkuTable` full width bên dưới (bảng cần đủ ngang).
-- `SkuTable.vue`: tìm kiếm, lọc nhóm, sort (aria-sort), phân trang, xuất CSV. Desktop (≥ sm): bảng 10 cột, ngành gộp vào ô SKU. Mobile: danh sách thẻ + select sắp xếp.
+- `SkuTable.vue`: ô Doanh thu có dòng phụ % so kỳ trước (title = doanh thu kỳ trước). Tìm kiếm, lọc nhóm, sort (aria-sort), phân trang, xuất CSV. Desktop (≥ sm): bảng 10 cột, ngành gộp vào ô SKU. Mobile: danh sách thẻ + select sắp xếp.
 - `composables/useSkuTable.ts`: `useSkuTable(rowsRef, actionFilterRef)` (actionFilter lấy từ store để hero điều khiển được), `PAGE_SIZE`, `SortKey`.
-- `lib/exportCsv.ts`: `exportAnalysisCsv(rows)`.
+- `lib/exportCsv.ts`: `exportAnalysisCsv(rows)` (có cột doanh thu kỳ trước, chênh lệch, do số lượng, do giá).
 
 ## rules
 - `components/RulesPanel.vue`: `<details>` mô tả rule, sinh text từ `THRESHOLDS` + settings.

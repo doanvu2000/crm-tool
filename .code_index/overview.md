@@ -39,10 +39,12 @@ src/
 │   ├── analysis/           DOMAIN: types, thresholds, engine thuần, Pinia store
 │   ├── import/             đọc file, map cột, dữ liệu mẫu, file mẫu CSV
 │   ├── settings/           panel thiết lập (metric ABC, basis, kỳ, ngưỡng A/B)
-│   ├── overview/           lọc ngành + KPI tiles
+│   ├── overview/           lọc ngành + KPI tiles + so với kỳ trước (PeriodCompare)
 │   ├── contribution/       Pareto, cơ cấu ABC, ma trận ABC x Velocity, Exception
 │   ├── inventory/          phân bố Velocity/DOS/OOS/Trend + scatter DOS x Growth
 │   ├── actions/            phân bổ Action + bảng SKU (lọc/sort/trang/xuất CSV)
+│   ├── editor/             bảng sửa dữ liệu đầu vào realtime + dải tác động Action
+│   ├── onboarding/         tour highlight hướng dẫn lần đầu (2 phase: intro, data)
 │   └── rules/              panel mô tả quy tắc đang áp dụng
 ├── shared/                 không biết gì về nghiệp vụ SKU
 │   ├── charts/             ChartCanvas, CountBarChart, palette, options, plugins

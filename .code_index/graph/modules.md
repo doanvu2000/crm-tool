@@ -2,7 +2,7 @@
 
 | Module | Import từ | Được dùng bởi |
 |---|---|---|
-| `app/` | `shared/composables`, `shared/ui`, `pages` (lazy) | `main.ts`, `App.vue` |
+| `app/` | `shared/composables`, `shared/ui`, `features/onboarding` (useTour cho nút Hướng dẫn), `pages` (lazy) | `main.ts`, `App.vue` |
 | `pages/SkuAnalysisPage` | mọi `features/*/index.ts`, `shared/ui`, `shared/lib` | router |
 | `features/analysis` | `shared/lib/format` | mọi feature |
 | `features/import` | `analysis` (type + store), `shared/lib`, `shared/ui` | page |
@@ -11,6 +11,8 @@
 | `features/contribution` | `analysis`, `shared/charts`, `shared/composables`, `shared/lib`, `shared/ui` | page |
 | `features/inventory` | `analysis`, `shared/charts`, `shared/ui` | page |
 | `features/actions` | `analysis`, `shared/charts`, `shared/composables`, `shared/lib`, `shared/ui` | page |
+| `features/editor` | `analysis` (store, type), `shared/composables`, `shared/lib`, `shared/ui` | page |
+| `features/onboarding` | `analysis` (store), `shared/composables`, `shared/ui` | page, `app/layout/AppHeader` |
 | `features/rules` | `analysis` (THRESHOLDS, type), `shared/lib` | page |
 | `shared/*` | chỉ `shared/*` + thư viện ngoài | mọi nơi |
 

@@ -3,7 +3,7 @@ import { computed, toRef } from 'vue';
 import { storeToRefs } from 'pinia';
 import { ABC_CLASSES, ACTION_GROUPS, useAnalysisStore, type SkuResult } from '@/features/analysis';
 import { usePalette } from '@/shared/composables/usePalette';
-import { fmt0, fmt1, money, pct } from '@/shared/lib/format';
+import { fmt0, fmt1, money, pct, signedPct } from '@/shared/lib/format';
 import AppIcon from '@/shared/ui/AppIcon.vue';
 import BaseCard from '@/shared/ui/BaseCard.vue';
 import ColorDot from '@/shared/ui/ColorDot.vue';
@@ -94,7 +94,7 @@ const sub = 'text-xs text-ink-3';
             </div>
             <div class="mt-0.5 truncate text-xs text-ink-3">{{ r.name }} · {{ r.category }}</div>
           </div>
-          <span class="num flex-none text-sm text-ink-2">{{ money(r.revenue) }}</span>
+          <span class="num flex-none text-right text-sm text-ink-2">{{ money(r.revenue) }}<span class="block text-xs text-ink-3">{{ signedPct(r.revenueGrowth, 0) }} kỳ trước</span></span>
         </div>
         <div class="mt-2.5 flex items-center gap-1.5">
           <ColorDot :color="actionColor(r)" />
@@ -141,7 +141,7 @@ const sub = 'text-xs text-ink-3';
               <div :class="sub">{{ r.name }}<template v-if="r.name"> · </template>{{ r.category }}</div>
             </td>
             <td :class="cell"><span class="pill"><ColorDot :color="abcColor(r)" />{{ r.abc }}</span></td>
-            <td :class="numCell">{{ money(r.revenue) }}</td>
+            <td :class="numCell" :title="`Kỳ trước ${money(r.prevRevenue)}${r.prevRevenueEstimated ? ' (ước tính)' : ''}`">{{ money(r.revenue) }}<div :class="[sub, 'font-sans']">{{ signedPct(r.revenueGrowth, 0) }} kỳ trước</div></td>
             <td :class="numCell">{{ fmt1(r.ads) }}<div :class="[sub, 'font-sans']">{{ r.velocity }}</div></td>
             <td :class="numCell">{{ pct(r.adsIndex, 0) }}</td>
             <td :class="numCell">{{ fmt0(r.stock) }}</td>
