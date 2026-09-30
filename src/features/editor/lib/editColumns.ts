@@ -1,4 +1,5 @@
 import type { SkuInput } from '@/features/analysis';
+import { parseNum } from '@/shared/lib/parse';
 
 export type EditKind = 'text' | 'number' | 'lifecycle' | 'bool';
 
@@ -23,3 +24,15 @@ export const EDIT_COLUMNS: EditColumn[] = [
   { key: 'seasonal', label: 'Mùa vụ', kind: 'bool', width: 'min-w-16' },
   { key: 'days', label: 'Số ngày kỳ', kind: 'number', width: 'min-w-20' }
 ];
+
+export const EDIT_GROUPS: { title: string; keys: (keyof SkuInput)[] }[] = [
+  { title: 'Thông tin', keys: ['name', 'category', 'lifecycle', 'seasonal'] },
+  { title: 'Kỳ này', keys: ['revenue', 'gp', 'units', 'oosDays', 'stock', 'days'] },
+  { title: 'Kỳ trước', keys: ['revenuePrev', 'unitsPrev'] }
+];
+
+export function parseEdit(col: EditColumn, value: string): Partial<SkuInput> {
+  if (col.kind === 'number') return { [col.key]: Math.max(0, parseNum(value)) };
+  const text = value.trim();
+  return { [col.key]: col.key === 'category' ? text || 'Khác' : text };
+}

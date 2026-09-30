@@ -8,6 +8,7 @@ import { usePalette } from '@/shared/composables/usePalette';
 import { fmt1, pct } from '@/shared/lib/format';
 import BaseCard from '@/shared/ui/BaseCard.vue';
 import ChartLegend from '@/shared/ui/ChartLegend.vue';
+import { MethodInfo } from '@/features/rules';
 
 const props = defineProps<{ rows: readonly SkuResult[] }>();
 const palette = usePalette();
@@ -99,6 +100,7 @@ const config = computed<ChartConfiguration<'scatter', Point[]>>(() => {
 
 <template>
   <BaseCard title="Tồn kho so với tăng trưởng" subtitle="Mỗi chấm là 1 SKU. Góc phải dưới: tồn cao + suy giảm, cần giảm PO. Vạch đứt: ngưỡng DOS 15 / 30 / 60 / 90">
+    <template #info><MethodInfo topic="scatter" /></template>
     <ChartLegend :items="legend" />
     <ChartCanvas :config="config" label="Biểu đồ phân tán DOS và tăng trưởng theo SKU" tall />
   </BaseCard>

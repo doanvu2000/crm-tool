@@ -1,3 +1,5 @@
+import type { ActionRuleId } from './actionRules';
+
 export const ABC_CLASSES = ['A', 'B', 'C'] as const;
 export const VELOCITY_LEVELS = ['Fast', 'Normal', 'Slow', 'Very Slow'] as const;
 export const DOS_LEVELS = ['Critical Low', 'Low', 'Healthy', 'High', 'Excess', 'Overstock'] as const;
@@ -81,6 +83,7 @@ export interface Classification {
 }
 
 export interface ActionDecision {
+  rule: ActionRuleId;
   group: ActionGroup;
   action: string;
   /** Điều kiện số liệu đã kích hoạt Rule, để truy xuất ngược. */

@@ -21,7 +21,7 @@ export const valueAxis = (p: ChartPalette) => ({
   beginAtZero: true,
   grid: { color: p.grid },
   border: { display: false },
-  ticks: { color: p.muted, precision: 0 }
+  ticks: { color: p.muted, precision: 0, callback: (v: string | number) => fmt0(Number(v)) }
 });
 
 export const categoryAxis = (p: ChartPalette) => ({
@@ -36,7 +36,9 @@ export function countBarConfig(
   labels: readonly string[],
   data: number[],
   colors: string[],
-  horizontal = false
+  horizontal = false,
+  active: string | null = null,
+  onPick?: (label: string) => void
 ): ChartConfiguration<'bar'> {
   const total = data.reduce((s, v) => s + v, 0);
   const max = Math.max(1, ...data);
@@ -46,6 +48,8 @@ export function countBarConfig(
     animation: animation(),
     indexAxis: horizontal ? 'y' : 'x',
     layout: { padding: horizontal ? { right: 64 } : { top: 20 } },
+    onClick: onPick ? (_e, els) => { if (els.length) onPick(labels[els[0].index]); } : undefined,
+    onHover: onPick ? (e, els) => { const t = e.native?.target as HTMLElement | undefined; if (t) t.style.cursor = els.length ? 'pointer' : 'default'; } : undefined,
     plugins: {
       tooltip: {
         ...tooltipStyle(p),
@@ -61,7 +65,7 @@ export function countBarConfig(
     type: 'bar',
     data: {
       labels: [...labels],
-      datasets: [{ data, backgroundColor: colors, borderRadius: 4, borderSkipped: false, maxBarThickness: 48 }]
+      datasets: [{ data, backgroundColor: active ? colors.map((c, i) => (labels[i] === active ? c : c + '40')) : colors, borderRadius: 4, borderSkipped: false, maxBarThickness: 48 }]
     },
     options
   };

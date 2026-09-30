@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { ABC_CLASSES, THRESHOLDS, VELOCITY_LEVELS, type SkuResult } from '@/features/analysis';
+import { ABC_CLASSES, THRESHOLDS, VELOCITY_LEVELS, type AbcClass, type SkuResult, type Velocity } from '@/features/analysis';
 import { usePalette } from '@/shared/composables/usePalette';
 import { fmt0, pct } from '@/shared/lib/format';
 import BaseCard from '@/shared/ui/BaseCard.vue';
 import InsightBox from '@/shared/ui/InsightBox.vue';
+import { MethodInfo } from '@/features/rules';
 
-const props = defineProps<{ rows: readonly SkuResult[] }>();
+const props = defineProps<{ rows: readonly SkuResult[]; activeAbc?: string | null; activeVelocity?: string | null }>();
+const emit = defineEmits<{ pick: [abc: AbcClass, velocity: Velocity] }>();
+const isActive = (i: number, j: number) => props.activeAbc === ABC_CLASSES[i] && props.activeVelocity === VELOCITY_LEVELS[j];
+const dimmed = (i: number, j: number) => !!(props.activeAbc && props.activeVelocity) && !isActive(i, j);
 const palette = usePalette();
 
 const matrix = computed(() => {
@@ -28,6 +32,7 @@ const C = THRESHOLDS.core;
 
 <template>
   <BaseCard title="Ma trận ABC x Tốc độ bán" subtitle="Số SKU mỗi ô. Viền xanh ngọc: vùng ứng viên Core SKU">
+    <template #info><MethodInfo topic="matrix" /></template>
     <div>
       <table class="w-full table-fixed border-separate border-spacing-1 text-[13px]">
         <thead>
@@ -39,14 +44,17 @@ const C = THRESHOLDS.core;
         <tbody>
           <tr v-for="(row, i) in matrix" :key="ABC_CLASSES[i]">
             <th scope="row" class="muted p-1 text-left font-medium">Class {{ ABC_CLASSES[i] }}</th>
-            <td
-              v-for="(cell, j) in row"
-              :key="j"
-              class="rounded-lg px-1 py-3 text-center num font-semibold transition-colors"
-              :class="cell.core && 'outline-2 -outline-offset-2 outline-tag'"
-              :style="{ background: cell.bg, color: cell.ink }"
-              :title="cell.title"
-            >{{ cell.n }}</td>
+            <td v-for="(cell, j) in row" :key="j" class="p-0">
+              <button
+                type="button"
+                class="num w-full rounded-lg px-1 py-3 text-center font-semibold transition-[opacity,box-shadow]"
+                :class="[cell.core && 'outline-2 -outline-offset-2 outline-tag', isActive(i, j) && 'ring-2 ring-ink ring-offset-2 ring-offset-surface', dimmed(i, j) && 'opacity-35']"
+                :style="{ background: cell.bg, color: cell.ink }"
+                :title="`${cell.title}. Bấm để lọc mọi bảng`"
+                :aria-pressed="isActive(i, j)"
+                @click="emit('pick', ABC_CLASSES[i], VELOCITY_LEVELS[j])"
+              >{{ cell.n }}</button>
+            </td>
           </tr>
         </tbody>
       </table>

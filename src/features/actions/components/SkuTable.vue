@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, toRef } from 'vue';
+import { computed, ref, toRef } from 'vue';
 import { storeToRefs } from 'pinia';
 import { ABC_CLASSES, ACTION_GROUPS, useAnalysisStore, type SkuResult } from '@/features/analysis';
+import { MethodInfo, SkuTrace } from '@/features/rules';
 import { usePalette } from '@/shared/composables/usePalette';
 import { fmt0, fmt1, money, pct, signedPct } from '@/shared/lib/format';
 import AppIcon from '@/shared/ui/AppIcon.vue';
@@ -12,6 +13,7 @@ import { exportAnalysisCsv } from '../lib/exportCsv';
 
 const props = defineProps<{ rows: readonly SkuResult[] }>();
 const palette = usePalette();
+const traced = ref<SkuResult | null>(null);
 const { actionFilter } = storeToRefs(useAnalysisStore());
 const { search, sortKey, sortDir, page, pageCount, filtered, pageRows, toggleSort } = useSkuTable(toRef(props, 'rows'), actionFilter);
 
@@ -46,7 +48,8 @@ const sub = 'text-xs text-ink-3';
 </script>
 
 <template>
-  <BaseCard title="Chi tiết SKU" subtitle="Mỗi Action kèm điều kiện số liệu đã kích hoạt Rule">
+  <BaseCard title="Chi tiết SKU" subtitle="Mỗi Action kèm điều kiện số liệu đã kích hoạt Rule. Bấm mã SKU để xem từng bước tính.">
+    <template #info><MethodInfo topic="skuTable" /></template>
     <div class="mb-3 flex flex-wrap items-center gap-2">
       <input
         v-model="search"
@@ -88,7 +91,7 @@ const sub = 'text-xs text-ink-3';
         <div class="flex items-start justify-between gap-2">
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-1.5">
-              <span class="num text-sm font-semibold text-ink">{{ r.sku }}</span>
+              <button type="button" class="num -mx-1 min-h-8 rounded px-1 text-sm font-semibold text-ink underline decoration-line decoration-2 underline-offset-4 hover:decoration-ink-3" :aria-label="`Xem cách tính ${r.sku}`" @click="traced = r">{{ r.sku }}</button>
               <span v-if="r.isCore" class="pill bg-tag! text-tag-ink!">Core</span>
               <span class="pill"><ColorDot :color="abcColor(r)" />{{ r.abc }}</span>
             </div>
@@ -135,7 +138,7 @@ const sub = 'text-xs text-ink-3';
           <tr v-for="r in pageRows" :key="r.sku" class="transition-colors hover:bg-sunken">
             <td :class="cell">
               <div class="flex items-center gap-1.5">
-                <span class="num font-medium text-ink">{{ r.sku }}</span>
+                <button type="button" class="num -mx-1 rounded px-1 font-medium text-ink underline decoration-line decoration-2 underline-offset-4 hover:decoration-ink-3" :aria-label="`Xem cách tính ${r.sku}`" @click="traced = r">{{ r.sku }}</button>
                 <span v-if="r.isCore" class="pill bg-tag! text-tag-ink!">Core</span>
               </div>
               <div :class="sub">{{ r.name }}<template v-if="r.name"> · </template>{{ r.category }}</div>
@@ -171,5 +174,6 @@ const sub = 'text-xs text-ink-3';
         <button type="button" class="btn sm:min-h-9" :disabled="page >= pageCount" @click="page++">Trang sau</button>
       </div>
     </div>
+    <SkuTrace :row="traced" @close="traced = null" />
   </BaseCard>
 </template>

@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import type { SkuResult } from '@/features/analysis';
 import { fmt0 } from '@/shared/lib/format';
 import BaseCard from '@/shared/ui/BaseCard.vue';
+import { MethodInfo } from '@/features/rules';
 
 const props = defineProps<{ rows: readonly SkuResult[] }>();
 
@@ -16,6 +17,7 @@ const items = computed(() => [
 
 <template>
   <BaseCard title="Exception cần xử lý trước khi kết luận" subtitle="SKU bất thường không áp Action theo ABC thông thường">
+    <template #info><MethodInfo topic="exceptions" /></template>
     <div class="grid grid-cols-2 gap-2.5">
       <div v-for="it in items" :key="it.title" class="rounded-xl border border-line bg-sunken p-3">
         <div class="num text-[22px] font-semibold">{{ fmt0(it.n) }}</div>

@@ -112,3 +112,29 @@ describe('so với kỳ trước', () => {
     expect(c.unitsChange).toBeNull();
   });
 });
+
+describe('bảng Rule', () => {
+  it('id không trùng và Action khớp bảng Rule', async () => {
+    const { ACTION_RULES } = await import('../model/actionRules');
+    expect(new Set(ACTION_RULES.map((r) => r.id)).size).toBe(ACTION_RULES.length);
+    const rows = analyzeSkus(
+      [
+        sku({ sku: 'eol', lifecycle: 'EOL' }),
+        sku({ sku: 'crit', stock: 10 }),
+        sku({ sku: 'over', stock: 100000 }),
+        sku({ sku: 'new', unitsPrev: 0, stock: 50 })
+      ],
+      DEFAULT_SETTINGS
+    );
+    const byId = new Map(ACTION_RULES.map((r) => [r.id, r]));
+    for (const r of rows) {
+      const rule = byId.get(r.rule)!;
+      expect(rule.group).toBe(r.group);
+      expect(rule.action).toBe(r.action);
+    }
+    expect(rows.find((r) => r.sku === 'eol')?.rule).toBe('eol-stock');
+    expect(rows.find((r) => r.sku === 'crit')?.rule).toBe('critical');
+    expect(rows.find((r) => r.sku === 'over')?.rule).toBe('overstock');
+    expect(rows.find((r) => r.sku === 'new')?.rule).toBe('new-replenish');
+  });
+});

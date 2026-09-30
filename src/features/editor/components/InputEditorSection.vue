@@ -4,20 +4,34 @@ import { storeToRefs } from 'pinia';
 import { ABC_CLASSES, ACTION_GROUPS, LIFECYCLES, countBy, useAnalysisStore, type Lifecycle, type SkuInput } from '@/features/analysis';
 import { usePalette } from '@/shared/composables/usePalette';
 import { fmt0, fmt1 } from '@/shared/lib/format';
-import { parseNum } from '@/shared/lib/parse';
 import AppIcon from '@/shared/ui/AppIcon.vue';
 import BaseCard from '@/shared/ui/BaseCard.vue';
 import ColorDot from '@/shared/ui/ColorDot.vue';
 import SectionHeader from '@/shared/ui/SectionHeader.vue';
 import { EDITOR_PAGE_SIZE, useInputEditor, type EditorRow } from '../composables/useInputEditor';
-import { EDIT_COLUMNS, type EditColumn } from '../lib/editColumns';
+import { EDIT_COLUMNS, parseEdit, type EditColumn } from '../lib/editColumns';
 import { exportInputCsv } from '../lib/exportInput';
 import CellInput from './CellInput.vue';
+import EditSkuDialog from './EditSkuDialog.vue';
+import { MethodInfo } from '@/features/rules';
 
 const store = useAnalysisStore();
-const { raw, rows, baselineRows, editedCount, sourceLabel } = storeToRefs(store);
+const { raw, activeRaw, rows, baselineRows, editedCount, removedCount, sourceLabel } = storeToRefs(store);
 const palette = usePalette();
-const { search, onlyEdited, page, pageCount, filtered, pageRows } = useInputEditor();
+const { search, onlyEdited, page, pageCount, filtered, pageRows, rowAt } = useInputEditor();
+
+const editingIndex = ref<number | null>(null);
+const editing = computed(() => (editingIndex.value == null ? null : rowAt(editingIndex.value)));
+const editingPos = computed(() => (editingIndex.value == null ? -1 : filtered.value.indexOf(editingIndex.value)));
+const editingLabel = computed(() => (editingPos.value < 0 ? '' : `${fmt0(editingPos.value + 1)} / ${fmt0(filtered.value.length)}`));
+
+function step(delta: number) {
+  const pos = editingPos.value + delta;
+  const next = filtered.value[pos];
+  if (next == null) return;
+  editingIndex.value = next;
+  page.value = Math.floor(pos / EDITOR_PAGE_SIZE) + 1;
+}
 const tableEl = ref<HTMLElement>();
 
 const actionColor = (g: string) => palette.value.action[ACTION_GROUPS.indexOf(g as (typeof ACTION_GROUPS)[number])];
@@ -36,11 +50,7 @@ const movedCount = computed(() => {
 
 const isEdited = (row: EditorRow, key: keyof SkuInput) => row.input[key] !== row.base[key];
 
-function commit(row: EditorRow, col: EditColumn, value: string) {
-  if (col.kind === 'number') return store.updateRow(row.index, { [col.key]: Math.max(0, parseNum(value)) });
-  const text = value.trim();
-  store.updateRow(row.index, { [col.key]: col.key === 'category' ? text || 'Khác' : text });
-}
+const commit = (row: EditorRow, col: EditColumn, value: string) => store.updateRow(row.index, parseEdit(col, value));
 
 const setLifecycle = (row: EditorRow, e: Event) => store.updateRow(row.index, { lifecycle: (e.target as HTMLSelectElement).value as Lifecycle });
 const setSeasonal = (row: EditorRow, e: Event) => store.updateRow(row.index, { seasonal: (e.target as HTMLInputElement).checked });
@@ -56,7 +66,7 @@ async function focusBelow(pos: number, col: number) {
 
 function resetAll() {
   if (!editedCount.value) return;
-  if (window.confirm(`Khôi phục ${fmt0(editedCount.value)} SKU đã sửa về số liệu trong file gốc?`)) store.resetAll();
+  if (window.confirm(`Khôi phục ${fmt0(editedCount.value)} SKU đã sửa hoặc đã xoá về số liệu trong file gốc?`)) store.resetAll();
 }
 
 const pageInfo = computed(() => {
@@ -78,10 +88,11 @@ const cell = 'border-t border-line px-1.5 py-1 align-middle';
       title="Sửa số liệu, Action tính lại ngay"
       subtitle="Bấm vào ô để sửa. Enter xuống dòng dưới, Esc huỷ. Mọi chart và bảng phía trên cập nhật theo số mới."
     >
+      <template #info><MethodInfo topic="editor" /></template>
       <div data-tour="input" class="mb-4 rounded-xl border px-3.5 py-3" :class="editedCount ? 'border-edit/50 bg-edit/5' : 'border-dashed border-line'" aria-live="polite">
         <p class="text-[13px] text-ink-2">
           <template v-if="editedCount">
-            <b class="font-semibold text-edit">{{ fmt0(editedCount) }} SKU đã sửa</b>,
+            <b class="font-semibold text-edit">{{ fmt0(editedCount) }} SKU đã sửa<template v-if="removedCount"> (gồm {{ fmt0(removedCount) }} SKU đã xoá)</template></b>,
             {{ fmt0(movedCount) }} SKU đổi nhóm Action so với file gốc:
           </template>
           <template v-else>Chưa sửa ô nào. Sửa 1 ô bất kỳ, thay đổi số SKU theo từng nhóm Action hiện ở đây.</template>
@@ -121,7 +132,7 @@ const cell = 'border-t border-line px-1.5 py-1 align-middle';
           <AppIcon name="undo" class="size-4" />
           Khôi phục file gốc
         </button>
-        <button type="button" class="btn" @click="exportInputCsv(raw)">
+        <button type="button" class="btn" @click="exportInputCsv(activeRaw)">
           <AppIcon name="download" class="size-4" />
           Tải CSV đã sửa
         </button>
@@ -143,24 +154,53 @@ const cell = 'border-t border-line px-1.5 py-1 align-middle';
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(row, pos) in pageRows" :key="row.index" class="group">
-              <th scope="row" :class="[cell, 'sticky left-0 z-10 min-w-28 whitespace-nowrap bg-surface px-3 text-left font-normal']">
-                <div class="flex items-center gap-1.5">
+            <tr v-for="(row, pos) in pageRows" :key="row.index" class="group" :class="row.removed && 'bg-sunken/60'">
+              <th scope="row" :class="[cell, 'sticky left-0 z-10 min-w-40 whitespace-nowrap bg-surface px-2 text-left font-normal']">
+                <div class="flex items-center gap-1">
                   <span v-if="row.edited" class="size-1.5 flex-none rounded-full bg-edit" aria-hidden="true" />
-                  <span class="num font-medium text-ink">{{ row.input.sku }}</span>
+                  <span class="num mr-auto font-medium" :class="row.removed ? 'text-ink-3 line-through' : 'text-ink'">{{ row.input.sku }}</span>
+                  <button
+                    type="button"
+                    class="grid size-8 place-items-center rounded-lg text-ink-3 hover:bg-sunken hover:text-ink"
+                    :aria-label="`Xem và sửa toàn bộ thông tin ${row.input.sku}`"
+                    title="Xem và sửa toàn bộ thông tin"
+                    @click="editingIndex = row.index"
+                  >
+                    <AppIcon name="edit" class="size-4" />
+                  </button>
+                  <button
+                    v-if="!row.removed"
+                    type="button"
+                    class="grid size-8 place-items-center rounded-lg text-ink-3 hover:bg-sunken hover:text-red-700 dark:hover:text-red-400"
+                    :aria-label="`Xoá ${row.input.sku} khỏi phân tích`"
+                    title="Xoá khỏi phân tích (khôi phục được)"
+                    @click="store.removeRow(row.index)"
+                  >
+                    <AppIcon name="trash" class="size-4" />
+                  </button>
+                  <button
+                    v-else
+                    type="button"
+                    class="grid size-8 place-items-center rounded-lg text-ink-3 hover:bg-sunken hover:text-ink"
+                    :aria-label="`Khôi phục ${row.input.sku}`"
+                    title="Khôi phục SKU"
+                    @click="store.restoreRow(row.index)"
+                  >
+                    <AppIcon name="undo" class="size-4" />
+                  </button>
                 </div>
                 <button
-                  v-if="row.edited"
+                  v-if="row.edited && !row.removed"
                   type="button"
-                  class="mt-0.5 inline-flex min-h-6 items-center gap-1 rounded text-xs text-ink-3 hover:text-ink"
+                  class="inline-flex min-h-6 items-center gap-1 rounded text-xs text-ink-3 hover:text-ink"
                   :aria-label="`Khôi phục ${row.input.sku} về file gốc`"
                   @click="store.resetRow(row.index)"
                 >
                   <AppIcon name="undo" class="size-3" />
-                  Khôi phục
+                  Về số gốc
                 </button>
               </th>
-              <td v-for="(col, c) in EDIT_COLUMNS" :key="col.key" :class="cell">
+              <td v-for="(col, c) in EDIT_COLUMNS" :key="col.key" :class="[cell, row.removed && 'opacity-40']" :inert="row.removed || undefined">
                 <select
                   v-if="col.kind === 'lifecycle'"
                   :value="row.input.lifecycle"
@@ -186,8 +226,9 @@ const cell = 'border-t border-line px-1.5 py-1 align-middle';
                 />
               </td>
               <td :class="[cell, 'px-3']">
+                <span v-if="row.removed" class="text-xs text-ink-3">Đã xoá khỏi phân tích</span>
                 <div
-                  v-if="row.result"
+                  v-else-if="row.result"
                   :key="`${row.result.group}:${row.result.abc}:${row.result.dosStatus}`"
                   :style="row.edited ? { animation: 'cell-flash 900ms ease-out' } : undefined"
                   class="-mx-1.5 rounded-lg px-1.5 py-0.5"
@@ -221,5 +262,14 @@ const cell = 'border-t border-line px-1.5 py-1 align-middle';
         </div>
       </div>
     </BaseCard>
+    <EditSkuDialog
+      :row="editing"
+      :position="editingLabel"
+      :has-prev="editingPos > 0"
+      :has-next="editingPos >= 0 && editingPos < filtered.length - 1"
+      @prev="step(-1)"
+      @next="step(1)"
+      @close="editingIndex = null"
+    />
   </section>
 </template>

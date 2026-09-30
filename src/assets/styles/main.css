@@ -41,7 +41,7 @@
   :focus-visible { @apply rounded-md outline-2 outline-offset-2 outline-focus; }
   button:not(:disabled), [role="button"]:not(:disabled), summary { cursor: pointer; }
   button, a, summary, label { touch-action: manipulation; }
-  [data-tour] { scroll-margin-top: 7rem; }
+  [data-tour] { scroll-margin-top: 10rem; }
   ::selection { @apply bg-tag text-tag-ink; }
 }
 

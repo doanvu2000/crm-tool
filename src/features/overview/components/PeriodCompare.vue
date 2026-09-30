@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { sumBy, type SkuResult } from '@/features/analysis';
 import { usePalette } from '@/shared/composables/usePalette';
 import { fmt0, money, pct, signedFmt0, signedMoney, signedPct } from '@/shared/lib/format';
+import { MethodInfo } from '@/features/rules';
 import BaseCard from '@/shared/ui/BaseCard.vue';
 
 const props = defineProps<{ rows: readonly SkuResult[] }>();
@@ -92,6 +93,7 @@ const numCell = `${cell} num text-right`;
     title="Doanh thu đổi vì số lượng bán hay vì giá"
     subtitle="Chênh lệch doanh thu tách thành phần do số lượng bán (tính theo giá kỳ trước) và phần do giá bán."
   >
+    <template #info><MethodInfo topic="compare" /></template>
     <p v-if="!hasPrev" class="rounded-xl border border-dashed border-line px-4 py-6 text-center text-sm text-ink-3">
       File chưa có số lượng hoặc doanh thu kỳ trước. Thêm cột <code class="font-mono text-ink">units_prev</code> và
       <code class="font-mono text-ink">revenue_prev</code> để so sánh.
@@ -116,10 +118,13 @@ const numCell = `${cell} num text-right`;
         </dl>
 
         <div class="rounded-xl border border-line px-3.5 py-3">
+          <div class="flex items-start justify-between gap-2">
           <p class="text-[13px] text-ink-2">
             Doanh thu thay đổi
             <b class="num font-semibold" :style="{ color: tone(all.revenue - all.prevRevenue) }">{{ signedMoney(all.revenue - all.prevRevenue) }}</b>, gồm:
           </p>
+          <div class="-mr-1.5 -mt-1.5"><MethodInfo topic="compareEffects" icon-only /></div>
+          </div>
           <ul class="mt-2.5 grid gap-2.5">
             <li v-for="e in effects" :key="e.label" class="grid grid-cols-[7.5rem_1fr_auto] items-center gap-2 text-[13px]">
               <span class="text-ink-2">{{ e.label }}</span>
@@ -138,15 +143,13 @@ const numCell = `${cell} num text-right`;
 
       <div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <div class="overflow-x-auto rounded-xl border border-line">
-          <table class="w-full min-w-[540px] border-collapse text-[13px]">
+          <table class="w-full min-w-[420px] border-collapse text-[13px]">
             <caption class="sr-only">So sánh kỳ trước theo ngành hàng</caption>
             <thead class="bg-sunken text-ink-2">
               <tr>
-                <th scope="col" class="px-2.5 py-2 text-left font-medium">Ngành hàng</th>
-                <th scope="col" class="px-2.5 py-2 text-right font-medium">Số lượng</th>
-                <th scope="col" class="px-2.5 py-2 text-right font-medium">Doanh thu</th>
-                <th scope="col" class="px-2.5 py-2 text-right font-medium">Do số lượng</th>
-                <th scope="col" class="px-2.5 py-2 text-right font-medium">Do giá</th>
+                <th scope="col" class="whitespace-nowrap px-2.5 py-2 text-left font-medium">Ngành hàng</th>
+                <th scope="col" class="whitespace-nowrap px-2.5 py-2 text-right font-medium">Số lượng</th>
+                <th scope="col" class="whitespace-nowrap px-2.5 py-2 text-right font-medium">Doanh thu</th>
               </tr>
             </thead>
             <tbody>
@@ -160,8 +163,6 @@ const numCell = `${cell} num text-right`;
                   <span :style="{ color: tone(c.revenue - c.prevRevenue) }">{{ signedMoney(c.revenue - c.prevRevenue) }}</span>
                   <div class="text-xs text-ink-3">{{ signedPct(ratio(c.revenue, c.prevRevenue)) }}</div>
                 </td>
-                <td :class="numCell" :style="{ color: tone(c.volume) }">{{ signedMoney(c.volume) }}</td>
-                <td :class="numCell" :style="{ color: tone(c.price) }">{{ signedMoney(c.price) }}</td>
               </tr>
             </tbody>
           </table>

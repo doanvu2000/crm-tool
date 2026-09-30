@@ -5,9 +5,10 @@ Xem và sửa dữ liệu đầu vào sau khi import, kết quả tính lại ng
 | File | Trách nhiệm |
 |---|---|
 | `components/InputEditorSection.vue` | Section #input: dải tác động (số SKU theo nhóm Action trước → sau sửa, `data-tour="input"`), tìm kiếm, chip "Chỉ SKU đã sửa", "Khôi phục file gốc" (confirm), "Tải CSV đã sửa", bảng 12 cột sửa được + cột Kết quả (Action, ABC, DOS, "Trước khi sửa"), phân trang 25 |
-| `components/CellInput.vue` | Ô sửa: draft chuỗi, commit sau 300ms / blur / Enter (Enter xuống dòng dưới qua `data-cell="pos:col"`), Esc huỷ. Không focus thì hiện số đã format |
-| `composables/useInputEditor.ts` | `useInputEditor()` lọc theo index trong `raw`, map kết quả theo sku (`rows`, `baselineRows`), `EDITOR_PAGE_SIZE` |
-| `lib/editColumns.ts` | `EDIT_COLUMNS` (key, label, kind text/number/lifecycle/bool) |
-| `lib/exportInput.ts` | `exportInputCsv(raw)` theo header file mẫu (có `revenue_prev`, `days`) |
+| `components/EditSkuDialog.vue` | `<dialog>` xem + sửa toàn bộ trường 1 SKU theo nhóm (Thông tin / Kỳ này / Kỳ trước), "Gốc: ..." dưới ô đã sửa, cột Kết quả live (Action, ABC, ADS, DOS, OOS, Growth, Doanh thu), nút Xem từng bước tính (SkuTrace), SKU trước/sau theo danh sách đang lọc, Xoá/Khôi phục SKU, Về số gốc |
+| `components/CellInput.vue` | Ô sửa (prop `field` = kiểu ô form trong dialog, `inputId` cho label): draft chuỗi, commit sau 300ms / blur / Enter (Enter xuống dòng dưới qua `data-cell="pos:col"`), Esc huỷ. Không focus thì hiện số đã format |
+| `composables/useInputEditor.ts` | `useInputEditor()` (+ `rowAt(index)`, `EditorRow.removed`) lọc theo index trong `raw`, map kết quả theo sku (`rows`, `baselineRows`), `EDITOR_PAGE_SIZE` |
+| `lib/editColumns.ts` | `EDIT_COLUMNS` (key, label, kind text/number/lifecycle/bool), `EDIT_GROUPS`, `parseEdit(col, value)` (số âm → 0, ngành trống → Khác) |
+| `lib/exportInput.ts` | `exportInputCsv(activeRaw)` (bỏ SKU đã xoá) theo header file mẫu (có `revenue_prev`, `days`) |
 
-SKU không sửa được (là khoá map kết quả). Số âm kẹp về 0. Ngành để trống thành "Khác".
+SKU không sửa được (là khoá map kết quả). Cột SKU sticky có icon sửa (mở dialog) + xoá. Xoá = đánh dấu `store.removed`, dòng gạch ngang + nút khôi phục; SKU đã xoá tính là đã sửa.

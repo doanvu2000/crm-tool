@@ -11,7 +11,9 @@ Dữ liệu mẫu ─────┤─ import/lib/sampleData.ts
           state:   raw (shallowRef), original (bản file gốc), settings, category, sourceLabel
           actions: setData, updateRow, resetRow, resetAll, updateSettings (sanitizeSettings), setCategory
           getters: rows = analyzeSkus(raw, settings)   ← cache theo raw + settings
-                   visibleRows = rows lọc theo category
+                   categoryRows = rows lọc theo category
+                   visibleRows = categoryRows lọc theo drill (lọc chéo)
+                   crossRows[field] / matrixRows = bỏ drill của chính chart đó
                    categories, hasData
                    editedIndexes/editedCount (raw[i] !== original[i])
                    baselineRows = analyzeSkus(original) chỉ khi có sửa

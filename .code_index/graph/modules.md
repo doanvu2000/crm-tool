@@ -13,7 +13,7 @@
 | `features/actions` | `analysis`, `shared/charts`, `shared/composables`, `shared/lib`, `shared/ui` | page |
 | `features/editor` | `analysis` (store, type), `shared/composables`, `shared/lib`, `shared/ui` | page |
 | `features/onboarding` | `analysis` (store), `shared/composables`, `shared/ui` | page, `app/layout/AppHeader` |
-| `features/rules` | `analysis` (THRESHOLDS, type), `shared/lib` | page |
+| `features/rules` | `analysis` (THRESHOLDS, ACTION_RULES, store, type), `shared/lib`, `shared/ui` | page, overview, contribution, inventory, actions, editor (MethodInfo, SkuTrace) |
 | `shared/*` | chỉ `shared/*` + thư viện ngoài | mọi nơi |
 
 ## Luật

@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { ACTION_GROUPS, countBy, sumBy, useAnalysisStore, type ActionGroup, type SkuResult } from '@/features/analysis';
 import { usePalette } from '@/shared/composables/usePalette';
 import { fmt0, pct } from '@/shared/lib/format';
+import { MethodInfo } from '@/features/rules';
 
 const props = defineProps<{ rows: readonly SkuResult[]; periodDays: number; source: string }>();
 const emit = defineEmits<{ pick: [group: ActionGroup] }>();
@@ -47,7 +48,10 @@ const stripKey = computed(() => `${props.source}:${props.rows.length}`);
     </div>
 
     <div class="py-5 pl-7 pr-4 sm:py-7 sm:pl-10 sm:pr-7">
-      <p class="eyebrow">Kỳ {{ periodDays }} ngày · {{ fmt0(rows.length) }} SKU · {{ source }}</p>
+      <div class="flex items-start justify-between gap-2">
+        <p class="eyebrow pt-1.5">Kỳ {{ periodDays }} ngày · {{ fmt0(rows.length) }} SKU · {{ source }}</p>
+        <div class="-mr-1.5 -mt-1"><MethodInfo topic="decision" /></div>
+      </div>
       <h2 id="decision-title" class="mt-2 max-w-[28ch] text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] text-balance sm:text-[34px]">
         {{ headline }}
       </h2>

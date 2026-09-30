@@ -11,6 +11,7 @@ export interface EditorRow {
   input: SkuInput;
   base: SkuInput;
   edited: boolean;
+  removed: boolean;
   result?: SkuResult;
   before?: SkuResult;
 }
@@ -23,7 +24,7 @@ const bySku = (rows: readonly SkuResult[]) => {
 
 export function useInputEditor() {
   const store = useAnalysisStore();
-  const { raw, original, rows, baselineRows, editedIndexes } = storeToRefs(store);
+  const { raw, original, removed, rows, baselineRows, editedIndexes } = storeToRefs(store);
 
   const search = useDebouncedRef('', 200);
   const onlyEdited = ref(false);
@@ -50,12 +51,14 @@ export function useInputEditor() {
     filtered.value.slice((page.value - 1) * EDITOR_PAGE_SIZE, page.value * EDITOR_PAGE_SIZE).map((index) => {
       const input = raw.value[index];
       const edited = editedSet.value.has(index);
+      const isRemoved = removed.value.has(index);
       return {
         index,
         input,
         base: original.value[index],
         edited,
-        result: resultMap.value.get(input.sku),
+        removed: isRemoved,
+        result: isRemoved ? undefined : resultMap.value.get(input.sku),
         before: edited ? beforeMap.value.get(input.sku) : undefined
       };
     })
@@ -66,5 +69,20 @@ export function useInputEditor() {
     if (page.value > n) page.value = n;
   });
 
-  return { search, onlyEdited, page, pageCount, filtered, pageRows };
+  function rowAt(index: number): EditorRow | null {
+    const input = raw.value[index];
+    if (!input) return null;
+    const isRemoved = removed.value.has(index);
+    return {
+      index,
+      input,
+      base: original.value[index],
+      edited: editedSet.value.has(index),
+      removed: isRemoved,
+      result: isRemoved ? undefined : resultMap.value.get(input.sku),
+      before: beforeMap.value.get(input.sku)
+    };
+  }
+
+  return { search, onlyEdited, page, pageCount, filtered, pageRows, rowAt };
 }

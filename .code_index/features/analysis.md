@@ -7,15 +7,16 @@ Trái tim nghiệp vụ. Engine thuần TS + Pinia store. Public API: `features/
 | File | Trách nhiệm |
 |---|---|
 | `model/types.ts` | Hằng thứ tự (`ABC_CLASSES`, `VELOCITY_LEVELS`, `DOS_LEVELS`, `OOS_LEVELS`, `TREND_LEVELS`, `ACTION_GROUPS`, `LIFECYCLES`) + type `SkuInput`, `AnalysisSettings`, `BaseMetrics`, `AbcAssignment`, `Classification`, `ActionDecision`, `SkuContext`, `SkuResult` |
+| `model/actionRules.ts` | `ACTION_RULES` (id, stage, when, group, action) theo đúng thứ tự xét, `ActionRuleId`, `ACTION_RULE_BY_ID`. `decideAction` lấy group/action từ đây nên bảng Quy tắc luôn khớp engine |
 | `model/thresholds.ts` | `THRESHOLDS` (mọi ngưỡng Pilot), `DEFAULT_SETTINGS`, `sanitizeSettings` |
 | `engine/metrics.ts` | `computeBaseMetrics`, `comparePrevious`, `categoryAverageAds` |
 | `engine/abc.ts` | `metricValue`, `assignAbc` |
 | `engine/classify.ts` | `velocityByAds`, `velocityByIndex`, `dosStatus`, `oosStatus`, `trendStatus`, `isCoreSku` |
-| `engine/actions.ts` | `decideAction` (rule engine) |
+| `engine/actions.ts` | `decideAction` (rule engine), trả `rule` id + group + action + reasons |
 | `engine/analyze.ts` | `analyzeSkus` pipeline |
 | `engine/aggregate.ts` | `countBy`, `sumBy` |
 | `engine/analyze.test.ts` | Vitest cho biên ngưỡng, ABC, Severe OOS, EOL, Core, Overstock |
-| `store/analysisStore.ts` | `useAnalysisStore` (state: raw, original, sourceLabel, settings, category, actionFilter; getters: rows, visibleRows, editedIndexes, editedCount, baselineRows; actions: setData, updateRow, resetRow, resetAll, updateSettings, setCategory, setActionFilter), `ALL_CATEGORIES` |
+| `store/analysisStore.ts` | `useAnalysisStore` (state: raw, original, removed (Set index đã xoá), sourceLabel, settings, category, actionFilter; drill; getters: activeRaw (raw bỏ removed, đầu vào của analyzeSkus), rows, categoryRows, visibleRows, crossRows, matrixRows, hasDrill, editedIndexes (sửa hoặc xoá), editedCount, removedCount, baselineRows; actions: setData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategory, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill), `ALL_CATEGORIES`, `DRILL_FIELDS`, `DRILL_LABEL`. `actionFilter` là computed get/set trên `drill.group` |
 
 ## Rules (theo `Nguyên tắc xây  dựng Analysis.md`, kèm cách hiểu đã chốt)
 
@@ -37,3 +38,10 @@ Trái tim nghiệp vụ. Engine thuần TS + Pinia store. Public API: `features/
 
 - Thêm tiêu chí mới (vd Lead Time): thêm field vào `SkuInput` + `COLUMNS` (import) → tính trong `metrics.ts` → phân loại trong `classify.ts` → dùng trong `actions.ts` → thêm test.
 - Ngưỡng theo ngành hàng: đổi `THRESHOLDS` thành hàm `thresholdsFor(category)` rồi truyền vào classify.
+
+## Lọc chéo (drill)
+
+- `drill`: `{ group?, abc?, velocity?, dosStatus?, oosStatus?, trend? }`, AND với nhau và với `category`.
+- `visibleRows` = category + mọi drill. `crossRows[field]` = category + drill trừ chính field đó: chart sở hữu field vẫn hiện đủ cột, cột đang chọn đậm, cột khác mờ.
+- `matrixRows` bỏ cả abc + velocity. ABC vẫn tính trên toàn bộ dữ liệu, drill chỉ lọc hiển thị.
+- Sửa/thêm field lọc: thêm vào `DRILL_FIELDS` + `DRILL_LABEL`, chart gọi `store.toggleDrill(field, value)`.

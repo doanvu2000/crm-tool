@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { fmt1 } from '@/shared/lib/format';
 
-const props = defineProps<{ value: string | number; numeric?: boolean; edited?: boolean; label: string; cellId: string }>();
+const props = defineProps<{ value: string | number; numeric?: boolean; edited?: boolean; label: string; cellId?: string; field?: boolean; inputId?: string }>();
 const emit = defineEmits<{ commit: [value: string]; next: [] }>();
 
 const draft = ref(String(props.value));
@@ -61,15 +61,17 @@ onBeforeUnmount(flush);
   <input
     :value="shown"
     :data-cell="cellId"
-    :aria-label="label"
+    :id="inputId"
+    :aria-label="inputId ? undefined : label"
     :inputmode="numeric ? 'decimal' : 'text'"
     type="text"
     autocomplete="off"
     spellcheck="false"
-    class="h-9 w-full min-w-0 rounded-lg border bg-transparent px-2 text-base transition-colors hover:border-ink-3 focus:bg-surface sm:text-[13px]"
+    class="w-full min-w-0 border text-base transition-colors hover:border-ink-3 focus:bg-surface"
     :class="[
+      field ? 'min-h-11 rounded-xl px-3 sm:text-sm' : 'h-9 rounded-lg bg-transparent px-2 sm:text-[13px]',
       numeric ? 'num text-right' : '',
-      edited ? 'border-edit/70 bg-edit/5 font-semibold text-ink' : 'border-transparent text-ink'
+      edited ? 'border-edit/70 bg-edit/5 font-semibold text-ink' : field ? 'border-line bg-sunken text-ink' : 'border-transparent text-ink'
     ]"
     @focus="onFocus"
     @input="onInput"

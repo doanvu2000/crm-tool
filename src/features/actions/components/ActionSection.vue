@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { ACTION_GROUPS, countBy, type SkuResult } from '@/features/analysis';
+import { ACTION_GROUPS, countBy, useAnalysisStore, type SkuResult } from '@/features/analysis';
 import CountBarChart from '@/shared/charts/CountBarChart.vue';
 import SectionHeader from '@/shared/ui/SectionHeader.vue';
 import SkuTable from './SkuTable.vue';
+import { MethodInfo } from '@/features/rules';
 
-const props = defineProps<{ rows: readonly SkuResult[] }>();
-const counts = computed(() => countBy(props.rows, 'group', ACTION_GROUPS));
+defineProps<{ rows: readonly SkuResult[] }>();
+const store = useAnalysisStore();
+const counts = computed(() => countBy(store.crossRows.group, 'group', ACTION_GROUPS));
 </script>
 
 <template>
@@ -21,7 +23,12 @@ const counts = computed(() => countBy(props.rows, 'group', ACTION_GROUPS));
         :data="counts"
         color-key="action"
         horizontal
-      />
+        pickable
+        :active="store.drill.group"
+        @pick="store.toggleDrill('group', $event)"
+      >
+        <template #info><MethodInfo topic="actionBar" /></template>
+      </CountBarChart>
       <SkuTable :rows="rows" />
     </div>
   </section>

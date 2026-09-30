@@ -21,7 +21,7 @@ function go(id: string) {
   <!-- rail: cột dọc desktop. bar: thanh ngang trượt trên mobile, cuộn riêng để trang không bị tràn ngang. -->
   <nav aria-label="Mục lục phân tích">
     <p v-if="variant === 'rail'" class="eyebrow mb-3 px-3">Mục lục</p>
-    <ul :class="variant === 'rail' ? 'grid gap-0.5' : 'flex snap-x gap-1.5 overflow-x-auto [scrollbar-width:none]'">
+    <ul :class="variant === 'rail' ? 'grid gap-0.5' : 'flex snap-x gap-1.5 overflow-x-auto [scrollbar-width:none] lg:flex-wrap lg:overflow-visible'">
       <li v-for="item in items" :key="item.id" :class="variant === 'bar' && 'flex-none snap-start'">
         <a
           :href="`#${item.id}`"

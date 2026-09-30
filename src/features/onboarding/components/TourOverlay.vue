@@ -8,7 +8,7 @@ import { findTarget, useTour } from '../composables/useTour';
 const PAD = 8;
 const GAP = 14;
 const EDGE = 12;
-const HEADER = 76;
+const HEADER = 128;
 
 const store = useAnalysisStore();
 const { seen, phase, steps, index, active, step, isLast, start, next, prev, finish, skipAll } = useTour();

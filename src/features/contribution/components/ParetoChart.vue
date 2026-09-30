@@ -9,6 +9,7 @@ import { fmt0, pct } from '@/shared/lib/format';
 import BaseCard from '@/shared/ui/BaseCard.vue';
 import ChartLegend from '@/shared/ui/ChartLegend.vue';
 import InsightBox from '@/shared/ui/InsightBox.vue';
+import { MethodInfo } from '@/features/rules';
 
 const props = defineProps<{ rows: readonly SkuResult[]; metric: AbcMetric }>();
 const palette = usePalette();
@@ -86,6 +87,7 @@ const summary = computed(() => {
 
 <template>
   <BaseCard title="Pareto đóng góp" :subtitle="`Tỷ trọng ${metricLabel} tích luỹ theo SKU, xếp giảm dần`">
+    <template #info><MethodInfo topic="pareto" /></template>
     <ChartLegend :items="legend" />
     <ChartCanvas :config="config" label="Biểu đồ Pareto đóng góp theo SKU" tall />
     <InsightBox>
