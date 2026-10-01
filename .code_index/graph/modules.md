@@ -5,6 +5,7 @@
 | `main.ts` | `features/analysis` (restore local dataset trước mount) | bootstrap |
 | `app/` | `shared/composables`, `shared/ui`, `features/onboarding` (useTour cho nút Hướng dẫn), `pages` (lazy) | `main.ts`, `App.vue` |
 | `pages/SkuAnalysisPage` | mọi `features/*/index.ts`, `shared/ui`, `shared/lib` | router |
+| `pilot/main.ts` | `features/sku-pilot/PilotApp.vue`, `shared/charts/setup`, `assets/styles/main.css` | `pilot.html` |
 | `features/analysis` | `shared/lib/format` | mọi feature |
 | `features/import` | `analysis` (type + store), `shared/lib`, `shared/ui` | page |
 | `features/settings` | `analysis` (store, type), `shared/lib/parse`, `shared/ui` | page |
@@ -12,6 +13,7 @@
 | `features/contribution` | `analysis`, `shared/charts`, `shared/composables`, `shared/lib`, `shared/ui` | page |
 | `features/inventory` | `analysis`, `shared/charts`, `shared/ui` | page |
 | `features/monthly-sales` | `import` (readSheet), `shared/charts`, `shared/composables`, `shared/lib`, `shared/ui` | page |
+| `features/sku-pilot` | `analysis` (pilot model/engine), `import` (readSheet), `shared/charts` (ChartCanvas, palette), `shared/lib`, `shared/ui`; Pilot dùng `composables/usePilotTheme` riêng | PilotApp |
 | `features/actions` | `analysis`, `shared/charts`, `shared/composables`, `shared/lib`, `shared/ui` | page |
 | `features/editor` | `analysis` (store, type), `shared/composables`, `shared/lib`, `shared/ui` | page |
 | `features/onboarding` | `analysis` (store), `shared/composables`, `shared/ui` | page, `app/layout/AppHeader` |

@@ -2,6 +2,7 @@
 
 SPA tĩnh phân tích SKU (ABC, ADS, DOS, OOS, Growth, Core SKU, Action) từ file CSV/Excel.
 Toàn bộ xử lý chạy trên trình duyệt, không có backend. Nghiệp vụ gốc: `Nguyên tắc xây  dựng Analysis.md`.
+File `/pilot.html` là website SKU Review ba tháng độc lập, bám nguyên tắc ABC Analysis & SKU Review trên Lark và chỉ hiển thị thông tin/trạng thái, không sinh Action. `index.html` tiếp tục là website SKU Analysis hiện tại.
 
 ## Stack
 
@@ -32,11 +33,13 @@ Toàn bộ xử lý chạy trên trình duyệt, không có backend. Nghiệp v�
 src/
 ├── main.ts                 bootstrap: Pinia, Router, Chart defaults, CSS
 ├── App.vue                 skip link + AppHeader + RouterView
-├── app/                    khung app: router.ts, layout/AppHeader.vue
+├── app/                    khung website cũ: router.ts, layout/AppHeader.vue
 ├── pages/                  1 file / route, chỉ ghép feature
 │   └── SkuAnalysisPage.vue
+├── pilot/                  bootstrap riêng cho pilot.html
 ├── features/               feature-first, mỗi feature có index.ts (public API)
 │   ├── analysis/           DOMAIN: types, thresholds, engine thuần, Pinia store
+│   ├── sku-pilot/           website ABC Analysis & SKU Review 3 tháng, import riêng và IndexedDB riêng
 │   ├── import/             đọc file, map cột ngành hàng/Subcat 1/2, dữ liệu mẫu, file mẫu CSV
 │   ├── settings/           chuẩn ABC CVS (Sales, rolling 8 tuần, 70/90 theo ngành) + basis bổ sung cho business rule
 │   ├── overview/           lọc phân cấp ngành hàng → Subcat 1/2 + KPI tiles + so với kỳ trước

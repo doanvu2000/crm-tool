@@ -22,6 +22,7 @@ Khai báo trong `@theme`, dark mode ghi đè biến ở `:root.dark`, nên compo
 
 Màu chart riêng ở `shared/charts/palette.ts` (neutrals khớp token trên).
 Biểu đồ doanh thu theo cửa hàng dùng bảng màu chuỗi `series` trong palette, tự đổi theo theme.
+Dashboard Pilot có công tắc sáng/tối riêng; lưu tại `sku-pilot-theme` và đọc chung `PALETTE`, không ghi preference `sku-theme` của web cũ. Bộ lọc tháng dùng chip có trạng thái `aria-pressed`; chart có nút chọn nhóm tương ứng để thao tác được bằng bàn phím. Bộ lọc bảng dùng native select, focus ring chung và bọc bảng ngang theo mẫu hiện có.
 
 ## Chữ
 

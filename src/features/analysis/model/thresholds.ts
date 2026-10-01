@@ -14,6 +14,17 @@ export const THRESHOLDS = {
   newSkuReplenishMaxDos: 15
 } as const;
 
+/** Baseline for the three-month SKU review pilot, sourced from the Lark guideline. */
+export const PILOT_THRESHOLDS = {
+  abc: { a: 0.8, b: 0.95 },
+  growth: { strong: 0.2, growth: 0.05, decline: -0.05, sharpDecline: -0.2 },
+  marginIndex: { high: 1.2, healthy: 1, low: 0.8 },
+  priceIndex: { premium: 1.3, midHigh: 1, midLow: 0.7 },
+  dos: { veryLow: 7, low: 15, healthy: 30, high: 60 },
+  status: { coreGrowthFloor: -0.05, growthAtRiskFloor: 0.2, growthAtRiskMaxDos: 15, overstockDosFloor: 60, lowMarginCeiling: 0.8, declineCeiling: -0.2, slowExcessGrowthCeiling: -0.05 },
+  periodDays: 90
+} as const;
+
 export const DEFAULT_SETTINGS: AnalysisSettings = {
   basis: 'ads',
   periodDays: 56,

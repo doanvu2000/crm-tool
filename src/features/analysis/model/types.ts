@@ -92,3 +92,48 @@ export interface ActionDecision {
 
 export type SkuContext = SkuInput & BaseMetrics & AbcAssignment & Classification;
 export type SkuResult = SkuContext & ActionDecision;
+
+/** Input row for the independent three-month SKU review dashboard. */
+export interface PilotSkuInput {
+  sku: string;
+  name: string;
+  category: string;
+  salesQty: [number, number, number];
+  revenue: [number, number, number];
+  profit: [number, number, number];
+  monthlyAvailable: boolean;
+  sellingPrice: number;
+  inventoryQty: number;
+  inventoryValue: number;
+  openingInventoryValue: number | null;
+  cogs3m: number;
+}
+
+export type PilotAbc = 'A' | 'B' | 'C';
+export type PilotGrowthStatus = 'Strong Growth' | 'Growth' | 'Stable' | 'Decline' | 'Sharp Decline' | 'N/A';
+export type PilotMarginStatus = 'High Margin' | 'Healthy' | 'Low Margin' | 'Very Low Margin' | 'N/A';
+export type PilotPriceSegment = 'Premium' | 'Mid-High' | 'Mid-Low' | 'Entry' | 'N/A';
+export type PilotDosStatus = 'Very Low Stock' | 'Low Stock' | 'Healthy Stock' | 'High Stock' | 'Overstock' | 'N/A';
+export type PilotSkuStatus = 'CORE' | 'GROWTH AT RISK' | 'CORE / OVERSTOCK' | 'SALES DRIVER / LOW MARGIN' | 'DECLINE' | 'SLOW / EXCESS' | 'Regular';
+
+export interface PilotSkuResult extends PilotSkuInput {
+  sales3m: number;
+  totalQty3m: number;
+  salesShare: number;
+  cumulativeSalesShare: number;
+  abc: PilotAbc;
+  growth: number | null;
+  growthStatus: PilotGrowthStatus;
+  margin: number | null;
+  marginIndex: number | null;
+  marginStatus: PilotMarginStatus;
+  asp: number | null;
+  priceIndex: number | null;
+  priceSegment: PilotPriceSegment;
+  averageDailySales: number;
+  dos: number | null;
+  dosStatus: PilotDosStatus;
+  dio: number | null;
+  dioBasis: 'DIO' | 'Inventory Days' | 'N/A';
+  status: PilotSkuStatus;
+}
