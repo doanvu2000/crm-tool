@@ -61,6 +61,15 @@ const pageRows = computed(() => filtered.value.slice((page.value - 1) * 10, page
 const hasMonthlyData = computed(() => filtered.value.length > 0 && filtered.value.every((row) => row.monthlyAvailable));
 const selectedPeriodDays = computed(() => selectedMonths.value.length * 30);
 const selectedMonthTitle = computed(() => selectedMonths.value.map((month) => monthLabels[month]).join(' + '));
+const growthComparisonMonths = computed(() => {
+  const currentMonth = selectedMonths.value.at(-1);
+  if (currentMonth == null) return null;
+  const previousMonth = selectedMonths.value.length >= 2 ? selectedMonths.value.at(-2) : currentMonth - 1;
+  return previousMonth == null || previousMonth < 0 ? null : { previousMonth, currentMonth };
+});
+const growthComparisonLabel = computed(() => growthComparisonMonths.value
+  ? `${monthLabels[growthComparisonMonths.value.currentMonth]} so với ${monthLabels[growthComparisonMonths.value.previousMonth]}`
+  : 'Không có tháng trước để so sánh Growth');
 const totalSales = computed(() => filtered.value.reduce((n, row) => n + row.sales3m, 0));
 const totalProfit = computed(() => filtered.value.reduce((n, row) => n + selectedMonths.value.reduce((sum, month) => sum + row.profit[month], 0), 0));
 const margin = computed(() => totalSales.value ? totalProfit.value / totalSales.value : null);
@@ -70,9 +79,9 @@ const avgDos = computed(() => {
   return values.length ? values.reduce((a, b) => a + b, 0) / values.length : null;
 });
 const overallRevenueGrowth = computed(() => {
-  if (selectedMonths.value.length < 2) return null;
-  const previousMonth = selectedMonths.value.at(-2)!;
-  const currentMonth = selectedMonths.value.at(-1)!;
+  const comparison = growthComparisonMonths.value;
+  if (!comparison) return null;
+  const { previousMonth, currentMonth } = comparison;
   const previous = filtered.value.reduce((n, row) => n + row.revenue[previousMonth], 0);
   const current = filtered.value.reduce((n, row) => n + row.revenue[currentMonth], 0);
   return previous > 0 ? current / previous - 1 : null;
@@ -120,11 +129,10 @@ const categoryOverview = computed(() => {
   const base = categories.value.filter((category) => !categoryFilter.value || category === categoryFilter.value)
     .map((category) => {
       const items = filtered.value.filter((row) => row.category === category);
-      const rev = [0, 1, 2].map((month) => items.reduce((n, row) => n + (selectedMonths.value.includes(month) ? row.revenue[month] : 0), 0));
+      const rev = [0, 1, 2].map((month) => items.reduce((n, row) => n + row.revenue[month], 0));
       const profit = [0, 1, 2].map((month) => items.reduce((n, row) => n + (selectedMonths.value.includes(month) ? row.profit[month] : 0), 0));
-      const previousMonth = selectedMonths.value.at(-2);
-      const currentMonth = selectedMonths.value.at(-1);
-      const revenueGrowth = previousMonth == null || currentMonth == null || rev[previousMonth] <= 0 ? null : rev[currentMonth] / rev[previousMonth] - 1;
+      const comparison = growthComparisonMonths.value;
+      const revenueGrowth = !comparison || rev[comparison.previousMonth] <= 0 ? null : rev[comparison.currentMonth] / rev[comparison.previousMonth] - 1;
       const currentRevenue = selectedMonths.value.reduce((n, month) => n + rev[month], 0);
       const currentProfit = selectedMonths.value.reduce((n, month) => n + profit[month], 0);
       const marginCurrent = currentRevenue > 0 ? currentProfit / currentRevenue : null;
@@ -146,7 +154,7 @@ const categoryOverview = computed(() => {
   const direction = categorySortDirection.value === 'asc' ? 1 : -1;
   return base.sort((a, b) => {
     const value = (item: typeof base[number]): string | number | null => {
-      if (categorySortKey.value === 'sales') return item.rev.reduce((sum, part) => sum + part, 0);
+      if (categorySortKey.value === 'sales') return selectedMonths.value.reduce((sum, month) => sum + item.rev[month], 0);
       if (categorySortKey.value === 'growth') return item.revenueGrowth;
       if (categorySortKey.value === 'profit') return item.profit.reduce((sum, part) => sum + part, 0);
       if (categorySortKey.value === 'dio') return item.avgDio;
@@ -251,7 +259,7 @@ onMounted(async () => {
     <div v-if="loading" class="card py-12 text-center text-sm text-ink-2" role="status">Đang khôi phục dữ liệu trên trình duyệt…</div>
     <template v-else>
       <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <div class="card"><p class="eyebrow">Doanh số {{ selectedMonths.length }} tháng</p><p class="num mt-2 text-2xl font-semibold">{{ money(totalSales) }} ₫</p><p class="mt-1 text-xs text-ink-2">{{ selectedMonths.length >= 2 ? `${monthLabels[selectedMonths.at(-1)!]} so với ${monthLabels[selectedMonths.at(-2)!]}: ${signedPct(overallRevenueGrowth)}` : 'Chọn từ hai tháng để xem tăng trưởng' }}</p></div>
+        <div class="card"><p class="eyebrow">Doanh số {{ selectedMonths.length }} tháng</p><p class="num mt-2 text-2xl font-semibold">{{ money(totalSales) }} ₫</p><p class="mt-1 text-xs text-ink-2">{{ growthComparisonMonths ? `${growthComparisonLabel}: ${signedPct(overallRevenueGrowth)}` : growthComparisonLabel }}</p></div>
         <div class="card"><p class="eyebrow">Lợi nhuận {{ selectedMonths.length }} tháng</p><p class="num mt-2 text-2xl font-semibold">{{ money(totalProfit) }} ₫</p><p class="mt-1 text-xs text-ink-2">Tổng Profit trong khoảng chọn</p></div>
         <div class="card"><p class="eyebrow">Margin {{ selectedMonths.length }} tháng</p><p class="num mt-2 text-2xl font-semibold">{{ pct(margin) }}</p><p class="mt-1 text-xs text-ink-2">Profit kỳ chọn / Revenue kỳ chọn</p></div>
         <div class="card"><p class="eyebrow">Giá trị tồn kho</p><p class="num mt-2 text-2xl font-semibold">{{ money(totalStockValue) }} ₫</p><p class="mt-1 text-xs text-ink-2">Tổng Inventory Value hiện tại</p></div>
@@ -262,7 +270,7 @@ onMounted(async () => {
       <div class="grid gap-4 lg:grid-cols-2">
         <BaseCard title="Doanh số theo tháng" subtitle="Bấm một tháng để chuyển kỳ phân tích"><ChartCanvas v-if="hasMonthlyData" :config="salesTrendChart" label="Biểu đồ doanh số ba tháng; bấm tháng để chọn kỳ" /><p v-else class="rounded-xl bg-sunken px-4 py-6 text-sm text-ink-2">File hiện tại chỉ có tổng số theo kỳ, chưa có dữ liệu doanh số từng tháng.</p></BaseCard>
         <BaseCard title="Đóng góp doanh số ABC" subtitle="Chọn nhóm để lọc các bảng và biểu đồ"><ChartCanvas :config="abcChart" label="Biểu đồ tỷ trọng doanh số theo nhóm ABC" /><div class="mt-2 flex flex-wrap gap-2"><button v-for="key in ['A', 'B', 'C']" :key="key" type="button" class="chip" @click="setCrossFilter('abc', key)">{{ key }} · {{ fmt0(filtered.filter(row => row.abc === key).length) }} SKU</button></div></BaseCard>
-        <BaseCard title="Xu hướng doanh số" :subtitle="selectedMonths.length >= 2 ? `Growth ${monthLabels[selectedMonths.at(-1)!]} so với ${monthLabels[selectedMonths.at(-2)!]}` : 'Cần chọn ít nhất hai tháng để tính Growth'"><ChartCanvas :config="growthChart" label="Biểu đồ số SKU theo nhóm tăng trưởng; bấm cột để lọc" /><div class="mt-2 flex flex-wrap gap-2"><button v-for="(label, index) in growthLabels" :key="label" type="button" class="chip" @click="setCrossFilter('growthStatus', label)">{{ growthNames[index] }} · {{ fmt0(filtered.filter(row => row.growthStatus === label).length) }}</button></div></BaseCard>
+        <BaseCard title="Xu hướng doanh số" :subtitle="`Growth ${growthComparisonLabel}`"><ChartCanvas :config="growthChart" label="Biểu đồ số SKU theo nhóm tăng trưởng; bấm cột để lọc" /><div class="mt-2 flex flex-wrap gap-2"><button v-for="(label, index) in growthLabels" :key="label" type="button" class="chip" @click="setCrossFilter('growthStatus', label)">{{ growthNames[index] }} · {{ fmt0(filtered.filter(row => row.growthStatus === label).length) }}</button></div></BaseCard>
         <BaseCard title="Phân khúc giá" subtitle="Price Index = ASP SKU / ASP Category"><ChartCanvas :config="priceChart" label="Biểu đồ số SKU theo phân khúc giá; bấm thanh để lọc" /><div class="mt-2 flex flex-wrap gap-2"><button v-for="key in priceLabels" :key="key" type="button" class="chip" @click="setCrossFilter('priceSegment', key)">{{ key }} · {{ fmt0(filtered.filter(row => row.priceSegment === key).length) }}</button></div></BaseCard>
       </div>
 
@@ -288,7 +296,7 @@ onMounted(async () => {
         <thead class="bg-sunken text-xs text-ink-2"><tr>
           <th v-for="column in [{ key: 'category', label: 'Category' }, { key: 'sales', label: 'Total Sales' }, { key: 'growth', label: 'Growth' }, { key: 'abc', label: 'ABC Contribution' }, { key: 'profit', label: 'Total Profit' }, { key: 'margin', label: 'Margin' }, { key: 'stock', label: 'Stock Value' }, { key: 'dos', label: 'Avg DOS' }, { key: 'dio', label: 'Avg DIO' }, { key: 'sku', label: 'SKU' }, { key: 'growthSku', label: 'Growth SKU' }, { key: 'overstock', label: 'Overstock' }, { key: 'lowStock', label: 'Low Stock' }, { key: 'decline', label: 'Decline' }]" :key="column.key" class="px-3 py-3"><button v-if="['category', 'sales', 'growth', 'profit', 'dio'].includes(column.key)" type="button" class="whitespace-nowrap hover:text-ink" :aria-label="`Sắp xếp theo ${column.label}`" @click="toggleCategorySort(column.key as 'category' | 'sales' | 'growth' | 'profit' | 'dio')">{{ column.label }}<span v-if="categorySortKey === column.key"> {{ categorySortDirection === 'asc' ? '↑' : '↓' }}</span></button><span v-else class="whitespace-nowrap">{{ column.label }}</span></th>
         </tr></thead><tbody><tr v-for="item in categoryOverview" :key="item.category" class="border-t border-line hover:bg-sunken/70">
-          <th scope="row" class="px-3 py-3 font-medium"><button type="button" class="text-left underline-offset-2 hover:underline" @click="setCrossFilter('category', item.category)">{{ item.category }}</button></th><td class="num px-3 py-3">{{ money(item.rev.reduce((a,b)=>a+b,0)) }} ₫</td><td class="num px-3 py-3">{{ signedPct(item.revenueGrowth) }}</td><td class="num px-3 py-3">A {{ money(item.abc[0]) }} / B {{ money(item.abc[1]) }} / C {{ money(item.abc[2]) }}</td><td class="num px-3 py-3">{{ money(item.profit.reduce((a,b)=>a+b,0)) }} ₫</td><td class="num px-3 py-3">{{ pct(item.marginCurrent) }}</td><td class="num px-3 py-3">{{ money(item.stockValue) }} ₫</td><td class="num px-3 py-3">{{ fmt1(item.avgDos) }}</td><td class="num px-3 py-3">{{ fmt1(item.avgDio) }}</td><td class="num px-3 py-3">{{ item.items.length }}</td><td class="num px-3 py-3">{{ item.growthSku }}</td><td class="num px-3 py-3">{{ item.overstockSku }}</td><td class="num px-3 py-3">{{ item.lowStockSku }}</td><td class="num px-3 py-3">{{ item.declineSku }}</td>
+          <th scope="row" class="px-3 py-3 font-medium"><button type="button" class="text-left underline-offset-2 hover:underline" @click="setCrossFilter('category', item.category)">{{ item.category }}</button></th><td class="num px-3 py-3">{{ money(selectedMonths.reduce((sum, month) => sum + item.rev[month], 0)) }} ₫</td><td class="num px-3 py-3">{{ signedPct(item.revenueGrowth) }}</td><td class="num px-3 py-3">A {{ money(item.abc[0]) }} / B {{ money(item.abc[1]) }} / C {{ money(item.abc[2]) }}</td><td class="num px-3 py-3">{{ money(item.profit.reduce((a,b)=>a+b,0)) }} ₫</td><td class="num px-3 py-3">{{ pct(item.marginCurrent) }}</td><td class="num px-3 py-3">{{ money(item.stockValue) }} ₫</td><td class="num px-3 py-3">{{ fmt1(item.avgDos) }}</td><td class="num px-3 py-3">{{ fmt1(item.avgDio) }}</td><td class="num px-3 py-3">{{ item.items.length }}</td><td class="num px-3 py-3">{{ item.growthSku }}</td><td class="num px-3 py-3">{{ item.overstockSku }}</td><td class="num px-3 py-3">{{ item.lowStockSku }}</td><td class="num px-3 py-3">{{ item.declineSku }}</td>
         </tr><tr v-if="!categoryOverview.length"><td colspan="14" class="px-4 py-8 text-center text-ink-3">Không có dữ liệu phù hợp.</td></tr></tbody>
       </table></div>
 
@@ -300,19 +308,19 @@ onMounted(async () => {
       </div>
       <p class="mb-3 text-sm text-ink-2">Bấm Category, ABC, Growth, Margin, phân khúc giá, DOS hoặc Status trong bảng để lọc toàn dashboard.</p>
       <div class="overflow-x-auto rounded-2xl border border-line bg-surface"><table class="w-full min-w-[1380px] text-left text-sm">
-        <thead class="bg-sunken text-xs text-ink-2"><tr><th class="px-3 py-3">SKU</th><th class="px-3 py-3">Sản phẩm</th><th class="px-3 py-3">Category</th><th class="px-3 py-3">ABC</th><th class="px-3 py-3">Sales {{ selectedMonths.length }}M</th><th class="px-3 py-3">Growth</th><th class="px-3 py-3">Margin</th><th class="px-3 py-3">Margin Index</th><th class="px-3 py-3">Price Index</th><th class="px-3 py-3">Phân khúc</th><th class="px-3 py-3">DOS</th><th class="px-3 py-3">DIO</th><th class="px-3 py-3">Status</th></tr></thead>
+        <thead class="bg-sunken text-xs text-ink-2"><tr><th class="px-3 py-3">SKU</th><th class="px-3 py-3">Sản phẩm</th><th class="px-3 py-3">Category</th><th class="px-3 py-3">ABC</th><th class="px-3 py-3">Sales {{ selectedMonths.length }}M</th><th class="px-3 py-3">Sales Qty {{ selectedMonths.length }}M</th><th class="px-3 py-3">Growth</th><th class="px-3 py-3">Margin<br><span class="font-normal text-ink-3">Margin TB</span></th><th class="px-3 py-3">Price Index</th><th class="px-3 py-3">Phân khúc</th><th class="px-3 py-3">Stock Qty</th><th class="px-3 py-3">Stock Value</th><th class="px-3 py-3">DOS</th><th class="px-3 py-3">DIO</th><th class="px-3 py-3">Status</th></tr></thead>
         <tbody><tr v-for="row in pageRows" :key="row.sku" class="border-t border-line hover:bg-sunken/70">
           <th scope="row" class="px-3 py-3 font-mono text-xs font-medium"><button type="button" @click="setCrossFilter('sku', row.sku)">{{ row.sku }}</button></th><td class="px-3 py-3"><button type="button" class="text-left" @click="setCrossFilter('sku', row.sku)">{{ row.name }}</button></td>
           <td class="px-3 py-3"><button type="button" class="text-left underline-offset-2 hover:underline" @click="setCrossFilter('category', row.category)">{{ row.category }}</button></td>
           <td class="px-3 py-3"><button type="button" class="pill font-semibold" @click="setCrossFilter('abc', row.abc)">{{ row.abc }} · {{ pct(row.salesShare) }}</button></td>
-          <td class="num px-3 py-3"><button type="button" @click="setCrossFilter('sales3m', String(row.sales3m))">{{ money(row.sales3m) }} ₫</button></td><td class="num px-3 py-3"><button type="button" class="text-left" @click="setCrossFilter('growthStatus', row.growthStatus)">{{ signedPct(row.growth) }} <span class="text-xs text-ink-3">{{ row.growthStatus }}</span></button></td>
-          <td class="num px-3 py-3"><button type="button" @click="setCrossFilter('marginStatus', row.marginStatus)">{{ pct(row.margin) }} <span class="text-xs text-ink-3">{{ row.marginStatus }}</span></button></td><td class="num px-3 py-3"><button type="button" @click="setCrossFilter('marginIndex', String(row.marginIndex ?? 'N/A'))">{{ row.marginIndex == null ? '-' : pct(row.marginIndex) }}</button></td><td class="num px-3 py-3"><button type="button" @click="setCrossFilter('priceIndex', String(row.priceIndex ?? 'N/A'))">{{ row.priceIndex == null ? '-' : pct(row.priceIndex) }}</button></td>
-          <td class="px-3 py-3"><button type="button" @click="setCrossFilter('priceSegment', row.priceSegment)">{{ row.priceSegment }}</button></td><td class="num px-3 py-3"><button type="button" class="text-left" @click="setCrossFilter('dosStatus', row.dosStatus)">{{ row.dos == null ? '-' : fmt1(row.dos) }} <span class="text-xs text-ink-3">{{ row.dosStatus }}</span></button></td>
+          <td class="num px-3 py-3"><button type="button" @click="setCrossFilter('sales3m', String(row.sales3m))">{{ money(row.sales3m) }} ₫</button></td><td class="num px-3 py-3">{{ fmt0(row.totalQty3m) }}</td><td class="num px-3 py-3"><button type="button" class="text-left" @click="setCrossFilter('growthStatus', row.growthStatus)">{{ signedPct(row.growth) }} <span class="text-xs text-ink-3">{{ row.growthStatus }}</span></button></td>
+          <td class="num px-3 py-3"><button type="button" class="text-left" @click="setCrossFilter('marginStatus', row.marginStatus)">{{ pct(row.margin) }} <span class="block text-xs text-ink-3">{{ row.marginStatus }}</span><span class="block text-xs text-ink-3">TB ngành: {{ pct(row.categoryMargin) }}</span></button></td><td class="num px-3 py-3"><button type="button" @click="setCrossFilter('priceIndex', String(row.priceIndex ?? 'N/A'))">{{ row.priceIndex == null ? '-' : pct(row.priceIndex) }}</button></td>
+          <td class="px-3 py-3"><button type="button" @click="setCrossFilter('priceSegment', row.priceSegment)">{{ row.priceSegment }}</button></td><td class="num px-3 py-3">{{ fmt0(row.inventoryQty) }}</td><td class="num px-3 py-3">{{ money(row.inventoryValue) }} ₫</td><td class="num px-3 py-3"><button type="button" class="text-left" @click="setCrossFilter('dosStatus', row.dosStatus)">{{ row.dos == null ? '-' : fmt1(row.dos) }} <span class="text-xs text-ink-3">{{ row.dosStatus }}</span></button></td>
           <td class="num px-3 py-3"><button type="button" class="text-left" @click="setCrossFilter('dioBasis', row.dioBasis)">{{ row.dio == null ? '-' : `${fmt1(row.dio)} ngày` }} <span class="text-xs text-ink-3">{{ row.dioBasis }}</span></button></td><td class="px-3 py-3"><button type="button" class="pill" @click="setCrossFilter('status', row.status)">{{ row.status }}</button></td>
-        </tr><tr v-if="!pageRows.length"><td colspan="13" class="px-4 py-8 text-center text-ink-3">Không có dữ liệu phù hợp.</td></tr></tbody>
+        </tr><tr v-if="!pageRows.length"><td colspan="15" class="px-4 py-8 text-center text-ink-3">Không có dữ liệu phù hợp.</td></tr></tbody>
       </table></div>
       <div class="mt-3 flex items-center justify-between gap-3 text-sm text-ink-2"><span>Trang {{ page }} / {{ pageCount }}</span><div class="flex gap-2"><button class="btn min-h-10 px-3" :disabled="page <= 1" @click="page--">Trước</button><button class="btn min-h-10 px-3" :disabled="page >= pageCount" @click="page++">Tiếp</button></div></div>
-      <p class="mt-5 rounded-xl bg-sunken px-4 py-3 text-xs leading-relaxed text-ink-2">ABC tính theo doanh số trong các tháng đã chọn; Growth so sánh hai tháng được chọn gần nhất; DOS dùng số ngày của khoảng chọn. DIO dùng tồn kho bình quân chia COGS kỳ chọn. Nếu chỉ có COGS 3 tháng, COGS kỳ con được ước tính theo doanh thu.</p>
+      <p class="mt-5 rounded-xl bg-sunken px-4 py-3 text-xs leading-relaxed text-ink-2">ABC tính theo doanh số trong các tháng đã chọn; Growth so sánh tháng được chọn gần nhất với tháng liền trước (nếu chọn nhiều tháng thì so sánh hai tháng được chọn gần nhất); DOS dùng số ngày của khoảng chọn. DIO dùng tồn kho bình quân chia COGS kỳ chọn. Nếu chỉ có COGS 3 tháng, COGS kỳ con được ước tính theo doanh thu.</p>
     </template>
   </div>
 </template>

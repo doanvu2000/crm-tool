@@ -6,7 +6,7 @@ Website dashboard riêng tại `/pilot.html` theo tài liệu Lark “Nguyên t�
 
 | File | Trách nhiệm |
 |---|---|
-| `components/SkuPilotDashboard.vue` | Chọn nhiều tháng, bộ lọc chung và lọc chéo từ biểu đồ/bảng, KPI, biểu đồ, Category Overview có tìm kiếm/sắp xếp, SKU Detail có bộ lọc và phân trang, DIO dashboard; không sinh Action |
+| `components/SkuPilotDashboard.vue` | Chọn nhiều tháng, bộ lọc chung và lọc chéo từ biểu đồ/bảng, KPI, biểu đồ, Category Overview có tìm kiếm/sắp xếp, SKU Detail có bộ lọc/phân trang và các cột Sales Qty theo kỳ chọn, Margin kèm Margin TB ngành, Stock Qty và Stock Value; DIO dashboard; không sinh Action |
 | `PilotApp.vue` | Root component của website Pilot, không dùng App.vue/router của website cũ |
 | `components/PilotHeader.vue` | Header riêng, công tắc theme và liên kết quay về web SKU Analysis cũ |
 | `composables/usePilotTheme.ts` | Theme và palette riêng theo `sku-pilot-theme`; cập nhật màu chart qua palette dùng chung mà không ghi preference `sku-theme` |
@@ -17,11 +17,11 @@ Website dashboard riêng tại `/pilot.html` theo tài liệu Lark “Nguyên t�
 ## Nghiệp vụ
 
 - Engine thuần dùng `features/analysis/engine/pilotDashboard.ts`; kiểu đầu vào/kết quả nằm trong `features/analysis/model/types.ts`.
-- `analyzePilotSkus` nhận danh sách M1/M2/M3 đang chọn; ABC, tổng bán/lãi, Margin và DOS tính trên khoảng đó; Growth so sánh hai tháng chọn cuối. Bộ lọc Category/ABC/Status, lọc chéo và bộ lọc SKU dùng chung cho toàn dashboard.
+- `analyzePilotSkus` nhận danh sách M1/M2/M3 đang chọn; ABC, tổng bán/lãi, Margin và DOS tính trên khoảng đó; Growth so sánh hai tháng chọn cuối, hoặc khi chỉ chọn một tháng thì so với tháng liền trước (M1 không có tháng trước nên Growth là N/A). Bộ lọc Category/ABC/Status, lọc chéo và bộ lọc SKU dùng chung cho toàn dashboard.
 - Ngưỡng theo Lark tập trung ở `PILOT_THRESHOLDS` trong `features/analysis/model/thresholds.ts`: ABC doanh số lũy kế 80/95%, Growth, Margin Index, Price Index và DOS.
 - DIO dùng trung bình giá trị tồn đầu/cuối kỳ khi có opening inventory; nếu thiếu thì dùng tồn cuối kỳ. Thiếu COGS thì DIO không khả dụng. Khi chỉ có COGS tổng 3 tháng, COGS của khoảng con được ước tính theo tỷ trọng doanh thu; không đặt ngưỡng DIO.
 - Status chỉ là nhãn mô tả để xem/lọc; không có bảng Recommendation/Action.
-- Data import chạy hoàn toàn trong trình duyệt; file hỗ trợ CSV/XLS/XLSX. Chọn nhiều tháng để cập nhật số tổng và mọi chỉ số; bấm điểm doanh số để chọn một tháng. Dữ liệu tổng kỳ không có breakdown tháng sẽ khóa chọn tháng và Growth hiện N/A.
+- Data import chạy hoàn toàn trong trình duyệt; file hỗ trợ CSV/XLS/XLSX. Chọn nhiều tháng để cập nhật số tổng và các chỉ số theo kỳ; Growth dùng hai tháng được chọn gần nhất, hoặc tháng liền trước khi chỉ chọn một tháng. Bấm điểm doanh số để chọn một tháng. Dữ liệu tổng kỳ không có breakdown tháng sẽ khóa chọn tháng và Growth hiện N/A.
 - Tìm kiếm và sắp xếp Category Overview theo Category, doanh số, Growth, Profit hoặc DIO; SKU Detail tìm kiếm và lọc theo Category, ABC, Growth, Margin, Price, DOS, DIO basis hoặc Status.
 - Theme Pilot lưu trong `sku-pilot-theme`, tách khỏi `sku-theme` của web cũ; hai entry point dùng chung token sáng/tối.
 - Thứ tự phần tồn kho: DIO Dashboard đứng trước biểu đồ Tình trạng DOS, tiếp theo là Category Overview.

@@ -10,8 +10,8 @@ export function analyzePilotSkus(rows: readonly PilotSkuInput[], selectedMonths:
   const selectedRevenue = (row: PilotSkuInput) => months.reduce((total, month) => total + row.revenue[month], 0);
   const selectedQty = (row: PilotSkuInput) => months.reduce((total, month) => total + row.salesQty[month], 0);
   const selectedProfit = (row: PilotSkuInput) => months.reduce((total, month) => total + row.profit[month], 0);
-  const previousMonth = months.length >= 2 ? months[months.length - 2] : undefined;
-  const currentMonth = months.length >= 2 ? months[months.length - 1] : undefined;
+  const currentMonth = months.at(-1);
+  const previousMonth = months.length >= 2 ? months.at(-2) : currentMonth != null && currentMonth > 0 ? currentMonth - 1 : undefined;
   const category = new Map<string, { revenue: number; qty: number; profit: number }>();
   for (const row of rows) {
     const current = category.get(row.category) ?? { revenue: 0, qty: 0, profit: 0 };
@@ -71,7 +71,7 @@ export function analyzePilotSkus(rows: readonly PilotSkuInput[], selectedMonths:
 
     return {
       ...row, sales3m, totalQty3m, salesShare, cumulativeSalesShare: cumulative, abc,
-      growth, growthStatus, margin, marginIndex, marginStatus, asp, priceIndex, priceSegment,
+      growth, growthStatus, margin, categoryMargin, marginIndex, marginStatus, asp, priceIndex, priceSegment,
       averageDailySales, dos, dosStatus, dio, dioBasis, status
     };
   });

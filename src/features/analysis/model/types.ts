@@ -125,6 +125,7 @@ export interface PilotSkuResult extends PilotSkuInput {
   growth: number | null;
   growthStatus: PilotGrowthStatus;
   margin: number | null;
+  categoryMargin: number | null;
   marginIndex: number | null;
   marginStatus: PilotMarginStatus;
   asp: number | null;
