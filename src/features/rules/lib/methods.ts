@@ -52,11 +52,11 @@ export const abcRule = (s: AnalysisSettings, total: number) =>
   `Xếp ${fmt0(total)} SKU giảm dần theo Sales (doanh thu bán thực tế) trong từng ngành hàng. SKU vào A khi tích luỹ trước nó < ${pct(s.cutA, 0)}, vào B khi < ${pct(s.cutB, 0)}, còn lại C.`;
 
 export const compareRule = () =>
-  'Doanh thu và số lượng kỳ trước được tổng hợp từ tháng liền trước, cùng SKU và cửa hàng đã chọn. Phần do số lượng = (SL tháng này - SL tháng trước) x giá bình quân tháng trước. Phần do giá = chênh lệch doanh thu - phần do số lượng.';
+  'Doanh thu kỳ trước lấy từ cột revenue_prev. Thiếu cột này thì ước tính = số lượng kỳ trước x giá bình quân kỳ này. Phần do số lượng = (SL kỳ này - SL kỳ trước) x giá bình quân kỳ trước. Phần do giá = chênh lệch doanh thu - phần do số lượng. Doanh thu ước tính thì phần do giá = 0.';
 
 export function methodNote(topic: MethodTopic, c: MethodContext): MethodNote {
   const s = c.settings;
-  const period = 'tháng đang chọn, dùng OOS days bình quân theo cửa hàng';
+  const period = `${s.periodDays} ngày (SKU có cột days thì dùng số ngày riêng)`;
   switch (topic) {
     case 'decision':
       return {
@@ -143,7 +143,7 @@ export function methodNote(topic: MethodTopic, c: MethodContext): MethodNote {
         title: 'Tốc độ bán',
         items: [
           { label: 'Dữ liệu', text: scope(c) },
-          { label: 'ADS', text: `Units gộp / Selling Days. Selling Days = số ngày trong tháng trừ OOS days bình quân cửa hàng của kỳ ${period}.` },
+          { label: 'ADS', text: `Units / Selling Days. Selling Days = kỳ ${period} - số ngày OOS.` },
           { label: 'ADS Index', text: 'ADS của SKU / ADS trung bình ngành hàng của SKU.' },
           { label: 'Phân loại', text: velocityRule(s) }
         ]
@@ -162,7 +162,7 @@ export function methodNote(topic: MethodTopic, c: MethodContext): MethodNote {
         title: 'OOS Rate',
         items: [
           { label: 'Dữ liệu', text: scope(c) },
-          { label: 'OOS Rate', text: `OOS days bình quân theo cửa hàng / số ngày trong tháng đang chọn.` },
+          { label: 'OOS Rate', text: `Số ngày hết hàng / kỳ ${period}.` },
           { label: 'Phân loại', text: oosRule() }
         ]
       };

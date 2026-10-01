@@ -11,7 +11,7 @@
 | `features/overview` | `analysis`, `shared/composables`, `shared/lib`, `shared/ui` | page |
 | `features/contribution` | `analysis`, `shared/charts`, `shared/composables`, `shared/lib`, `shared/ui` | page |
 | `features/inventory` | `analysis`, `shared/charts`, `shared/ui` | page |
-| `features/monthly-sales` | `analysis` (SkuInput, store), `import` (readSheet, parseLifecycle), `shared/charts`, `shared/composables`, `shared/lib`, `shared/ui` | page |
+| `features/monthly-sales` | `import` (readSheet), `shared/charts`, `shared/composables`, `shared/lib`, `shared/ui` | page |
 | `features/actions` | `analysis`, `shared/charts`, `shared/composables`, `shared/lib`, `shared/ui` | page |
 | `features/editor` | `analysis` (store, type), `shared/composables`, `shared/lib`, `shared/ui` | page |
 | `features/onboarding` | `analysis` (store), `shared/composables`, `shared/ui` | page, `app/layout/AppHeader` |

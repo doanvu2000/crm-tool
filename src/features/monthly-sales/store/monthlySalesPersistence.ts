@@ -1,18 +1,13 @@
 import type { MonthlySaleInput } from '../model/types';
 
 const DATABASE_NAME = 'crm-tool-monthly-sales';
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 1;
 const STORE_NAME = 'history';
 const RECORD_ID = 'latest';
 
 interface SavedMonthlySales {
   rows: MonthlySaleInput[];
   sourceLabel: string;
-}
-
-interface StoredMonthlySales extends SavedMonthlySales {
-  id: string;
-  version: number;
 }
 
 let databasePromise: Promise<IDBDatabase> | undefined;
@@ -23,9 +18,7 @@ function openDatabase(): Promise<IDBDatabase> {
   if (databasePromise) return databasePromise;
   databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
-    request.onupgradeneeded = () => {
-      if (!request.result.objectStoreNames.contains(STORE_NAME)) request.result.createObjectStore(STORE_NAME, { keyPath: 'id' });
-    };
+    request.onupgradeneeded = () => request.result.createObjectStore(STORE_NAME, { keyPath: 'id' });
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error ?? new Error('Could not open monthly sales storage'));
   }).catch((error: unknown) => {
@@ -41,8 +34,8 @@ export async function loadMonthlySales(): Promise<SavedMonthlySales | null> {
     return await new Promise((resolve, reject) => {
       const request = database.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(RECORD_ID);
       request.onsuccess = () => {
-        const saved = request.result as StoredMonthlySales | undefined;
-        resolve(saved && saved.version === DATABASE_VERSION && Array.isArray(saved.rows)
+        const saved = request.result as (SavedMonthlySales & { id: string }) | undefined;
+        resolve(saved && Array.isArray(saved.rows)
           ? { rows: saved.rows, sourceLabel: typeof saved.sourceLabel === 'string' ? saved.sourceLabel : '' }
           : null);
       };
@@ -58,7 +51,7 @@ export function saveMonthlySales(snapshot: SavedMonthlySales): void {
     const database = await openDatabase();
     await new Promise<void>((resolve, reject) => {
       const transaction = database.transaction(STORE_NAME, 'readwrite');
-      transaction.objectStore(STORE_NAME).put({ ...snapshot, id: RECORD_ID, version: DATABASE_VERSION });
+      transaction.objectStore(STORE_NAME).put({ ...snapshot, id: RECORD_ID });
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error ?? new Error('Could not save monthly sales'));
       transaction.onabort = () => reject(transaction.error ?? new Error('Monthly sales save was aborted'));

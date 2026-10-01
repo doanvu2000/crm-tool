@@ -1,6 +1,6 @@
 # features/import
 
-Tiện ích đọc file CSV/XLSX và mapper SKU cũ. Public API: `ImportPanel`, `mapRows`, `parseLifecycle`, `ImportError`, `generateSampleData`, `COLUMNS`, `readSheet`, `ACCEPTED_FILE`. Trang chính dùng `monthly-sales` làm nguồn dữ liệu duy nhất.
+Đưa dữ liệu vào store. Public API: `ImportPanel`, `mapRows`, `parseLifecycle`, `ImportError`, `generateSampleData`, `COLUMNS`, `readSheet`, `ACCEPTED_FILE`.
 
 | File | Trách nhiệm |
 |---|---|

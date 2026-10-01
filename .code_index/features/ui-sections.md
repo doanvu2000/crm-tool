@@ -3,7 +3,7 @@
 Tất cả nhận `rows: readonly SkuResult[]` (đã lọc ngành) từ `pages/SkuAnalysisPage.vue`.
 
 ## settings
-- `components/SettingsPanel.vue`: hiển thị chuẩn ABC CVS theo tháng chọn (Sales, theo ngành, ngưỡng 70/90); chỉ cho chọn basis tốc độ bán dùng bổ sung trong business rule.
+- `components/SettingsPanel.vue`: hiển thị chuẩn ABC CVS cố định (Sales, rolling 8 tuần, theo ngành, ngưỡng 70/90); chỉ cho chọn basis tốc độ bán dùng bổ sung trong business rule.
 
 ## overview
 - `components/DecisionHero.vue`: thẻ ưu tiên ABC (điểm nhấn), nhận `crossRows.abc` của ngành đang chọn; mô tả A Phải có, B Nên có, C Cân nhắc có; emit `pick(abc)` → page `toggleDrill('abc')` + cuộn tới #contribution.
@@ -13,7 +13,7 @@ Tất cả nhận `rows: readonly SkuResult[]` (đã lọc ngành) từ `pages/S
 - `components/PeriodCompare.vue` (#compare): số lượng + doanh thu kỳ trước → kỳ này, tách thay đổi doanh thu do số lượng / do giá (nút ⓘ `compareEffects`), bảng theo ngành chỉ còn cột Số lượng + Doanh thu, top 5 SKU giảm doanh thu.
 
 ## monthly-sales
-- `features/monthly-sales/components/MonthlySalesSection.vue` (#monthly-sales): nguồn dữ liệu duy nhất `month, store, sku, category, revenue, units, gp, stock, oos_days` cùng thuộc tính SKU tùy chọn; chọn tháng hiện tại và nhiều cửa hàng. Các cửa hàng chọn được cộng theo SKU để mọi KPI, chart và bảng phân tích dùng cùng snapshot. Line chart giữ toàn bộ lịch sử tháng. Dữ liệu lưu cục bộ bằng IndexedDB.
+- `features/monthly-sales/components/MonthlySalesSection.vue` (#monthly-sales): nhập file lịch sử `month, store, sku, revenue, units`, checkbox chọn nhiều cửa hàng, biểu đồ đường doanh thu theo tháng; dữ liệu lưu cục bộ riêng bằng IndexedDB.
 
 ## contribution
 - `components/ContributionSection.vue`: layout 12 cột.
@@ -28,7 +28,7 @@ Tất cả nhận `rows: readonly SkuResult[]` (đã lọc ngành) từ `pages/S
 
 ## actions
 - `components/ActionSection.vue`: `CountBarChart` ngang full width (pickable theo group), `SkuTable` full width bên dưới (bảng cần đủ ngang).
-- `SkuTable.vue`: mã SKU là button mở `SkuTrace` (rules). Ô Doanh thu có dòng phụ % so tháng trước (title = doanh thu tháng trước), có cột GP. Tìm kiếm, lọc nhóm, sort (aria-sort), phân trang, xuất CSV có đủ Ngành/Subcat 1/2. Desktop (≥ sm): bảng 11 cột, đường dẫn ngành gộp vào ô SKU. Mobile: danh sách thẻ + select sắp xếp.
+- `SkuTable.vue`: mã SKU là button mở `SkuTrace` (rules). Ô Doanh thu có dòng phụ % so kỳ trước (title = doanh thu kỳ trước). Tìm kiếm, lọc nhóm, sort (aria-sort), phân trang, xuất CSV có đủ Ngành/Subcat 1/2. Desktop (≥ sm): bảng 10 cột, đường dẫn ngành gộp vào ô SKU. Mobile: danh sách thẻ + select sắp xếp.
 - `composables/useSkuTable.ts`: `useSkuTable(rowsRef, actionFilterRef)` (actionFilter lấy từ store để hero điều khiển được), `PAGE_SIZE`, `SortKey`.
 - `lib/exportCsv.ts`: `exportAnalysisCsv(rows)` (có cột doanh thu kỳ trước, chênh lệch, do số lượng, do giá).
 

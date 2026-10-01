@@ -36,8 +36,6 @@ export interface SkuInput {
   seasonal: boolean;
   /** 0 = dùng kỳ chung trong settings. */
   days: number;
-  /** Số cửa hàng có bản ghi cho SKU trong kỳ; dùng để diễn giải tổng store-days. */
-  storeCount?: number;
 }
 
 export interface AnalysisSettings {

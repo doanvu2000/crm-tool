@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { computed, nextTick, watch } from 'vue';
+import { computed, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAnalysisStore, type AbcClass } from '@/features/analysis';
 import { ActionSection } from '@/features/actions';
 import { ContributionSection } from '@/features/contribution';
 import { InputEditorSection } from '@/features/editor';
+import { ImportPanel } from '@/features/import';
 import { InventorySection } from '@/features/inventory';
-import { MonthlySalesSection, toAnalysisInputs, useMonthlySalesStore } from '@/features/monthly-sales';
+import { MonthlySalesSection } from '@/features/monthly-sales';
 import { TourOverlay } from '@/features/onboarding';
 import { CategoryFilter, DecisionHero, DrillBar, KpiGrid, PeriodCompare } from '@/features/overview';
 import { MethodInfo, RulesPanel } from '@/features/rules';
@@ -18,22 +19,15 @@ import SectionHeader from '@/shared/ui/SectionHeader.vue';
 import SectionNav from '@/shared/ui/SectionNav.vue';
 
 const store = useAnalysisStore();
-const monthlySales = useMonthlySalesStore();
 const { hasData, visibleRows, crossRows, settings, sourceLabel, editedCount, hasDrill, selectedCategories } = storeToRefs(store);
 const filtering = computed(() => hasDrill.value);
-
-watch(
-  () => [monthlySales.rows, monthlySales.selectedMonth, monthlySales.selectedStores] as const,
-  () => store.setDerivedData(toAnalysisInputs(monthlySales.rows, monthlySales.selectedMonth, monthlySales.selectedStores), monthlySales.sourceLabel),
-  { immediate: true }
-);
 
 // Thứ tự phải khớp thứ tự trên trang để mục lục tô đúng mục đang đọc.
 const navItems = computed(() => [
   { id: 'data', label: 'Dữ liệu' },
   { id: 'dashboard', label: 'Quyết định', meta: fmt0(visibleRows.value.length) },
-  { id: 'monthly-sales', label: 'Doanh thu tháng' },
   { id: 'overview', label: 'Tổng quan' },
+  { id: 'monthly-sales', label: 'Doanh thu tháng' },
   { id: 'contribution', label: 'Đóng góp' },
   { id: 'inventory', label: 'Tồn kho' },
   { id: 'actions', label: 'Chi tiết Action' },
@@ -60,8 +54,8 @@ async function pickAbc(abc: AbcClass) {
     <div class="min-w-0">
       <section id="data" class="scroll-mt-40" aria-labelledby="data-title">
         <h2 id="data-title" class="sr-only">Dữ liệu và thiết lập</h2>
-        <MonthlySalesSection v-if="!hasData" />
-        <div class="mt-4">
+        <div class="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <ImportPanel />
           <SettingsPanel />
         </div>
       </section>
@@ -70,9 +64,11 @@ async function pickAbc(abc: AbcClass) {
         <AppIcon name="empty" class="mx-auto size-10 text-ink-3" />
         <h2 class="mt-3 text-lg font-semibold tracking-tight">Chưa có dữ liệu để phân tích</h2>
         <p class="mx-auto mt-1 max-w-md text-sm text-ink-2">
-          {{ monthlySales.hasData ? 'Tháng và cửa hàng đang chọn chưa có mã SKU. Hãy đổi bộ lọc hoặc thêm đủ dòng dữ liệu cho phạm vi đó.' : 'Tải file dữ liệu tháng ở trên, sau đó chọn tháng và cửa hàng để dùng chung cho biểu đồ và các bảng.' }}
+          Tải file SKU hoặc bấm "Dùng dữ liệu mẫu" để xem SKU nào cần tăng PO, giảm PO hay xả hàng.
         </p>
       </div>
+
+      <MonthlySalesSection v-if="!hasData" class="mt-6" />
 
       <template v-if="hasData">
         <div id="dashboard" class="mt-6 scroll-mt-40">
@@ -82,8 +78,6 @@ async function pickAbc(abc: AbcClass) {
           </div>
         </div>
 
-        <MonthlySalesSection class="mt-6" />
-
         <section id="overview" class="scroll-mt-40" aria-label="Tổng quan">
           <SectionHeader title="Tổng quan" :hint="`${fmt0(visibleRows.length)} SKU đang xem`">
             <MethodInfo topic="kpi" />
@@ -91,6 +85,8 @@ async function pickAbc(abc: AbcClass) {
           <KpiGrid :rows="visibleRows" />
           <PeriodCompare id="compare" data-tour="compare" :rows="visibleRows" class="mt-4" />
         </section>
+
+        <MonthlySalesSection class="mt-6" />
 
         <ContributionSection id="contribution" class="scroll-mt-40" :rows="visibleRows" />
         <InventorySection id="inventory" class="scroll-mt-40" :rows="visibleRows" :basis="settings.basis" />

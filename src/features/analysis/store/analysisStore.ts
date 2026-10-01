@@ -128,26 +128,6 @@ export const useAnalysisStore = defineStore('analysis', () => {
     persistData();
   }
 
-  function setDerivedData(data: SkuInput[], label: string) {
-    raw.value = markRaw(data);
-    original.value = raw.value;
-    removed.value = new Set();
-    sourceLabel.value = label;
-    const availableCategories = new Set(data.map((row) => row.category));
-    selectedCategories.value = selectedCategories.value.filter((category) => availableCategories.has(category));
-    const scoped = selectedCategories.value.length
-      ? data.filter((row) => selectedCategories.value.includes(row.category))
-      : data;
-    const availableSubcat1 = new Set(scoped.map((row) => row.subcat1).filter(Boolean));
-    if (selectedSubcat1.value && !availableSubcat1.has(selectedSubcat1.value)) {
-      selectedSubcat1.value = '';
-      selectedSubcat2.value = '';
-    } else if (selectedSubcat2.value && !scoped.some((row) => row.subcat1 === selectedSubcat1.value && row.subcat2 === selectedSubcat2.value)) {
-      selectedSubcat2.value = '';
-    }
-    persistData();
-  }
-
   function updateRow(index: number, patch: Partial<SkuInput>) {
     const current = raw.value[index];
     if (!current) return;
@@ -255,6 +235,6 @@ export const useAnalysisStore = defineStore('analysis', () => {
   return {
     raw, original, removed, activeRaw, sourceLabel, settings, selectedCategories, selectedSubcat1, selectedSubcat2, actionFilter, drill,
     rows, hasData, categories, categoryRows, visibleRows, crossRows, matrixRows, hasDrill, editedIndexes, editedCount, removedCount, baselineRows,
-    setData, setDerivedData, restoreSavedData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategories, setSubcat1, setSubcat2, toggleCategory, selectAllCategories, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill
+    setData, restoreSavedData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategories, setSubcat1, setSubcat2, toggleCategory, selectAllCategories, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill
   };
 });
