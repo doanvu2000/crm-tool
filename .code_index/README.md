@@ -15,4 +15,4 @@ Bản đồ kiến trúc gọn để đọc trước khi sửa code. Đọc theo
 - Đổi ngưỡng / rule nghiệp vụ → cập nhật `features/analysis.md` (mục Rules).
 - Không chép code vào index; chỉ ghi đường dẫn, trách nhiệm, quan hệ.
 
-Cập nhật lần cuối: 2026-10-05 (template Pilot tải dạng XLSX; thêm sales motion Fast/Slow/Non-moving; bổ sung Power Query cho SKU Analysis CVS).
+Cập nhật lần cuối: 2026-10-05 (tối ưu xếp hạng sales motion theo cohort trong engine SKU).

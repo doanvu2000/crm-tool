@@ -2,10 +2,13 @@ import { NON_MOVING_THRESHOLDS, SALES_MOTION_THRESHOLDS, THRESHOLDS as T } from 
 import type { AbcClass, DosStatus, Lifecycle, OosStatus, SalesMotion, SkuInput, Trend, Velocity } from '../model/types';
 
 const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+const NON_NUMERIC_THRESHOLDS = Object.keys(NON_MOVING_THRESHOLDS)
+  .sort((a, b) => normalize(b).length - normalize(a).length)
+  .filter((key) => !/^\d/.test(key))
+  .map((key) => ({ normalized: normalize(key), days: NON_MOVING_THRESHOLDS[key as keyof typeof NON_MOVING_THRESHOLDS] }));
 
 export function nonMovingThresholdDays(r: Pick<SkuInput, 'category' | 'subcat1' | 'subcat2'>): number | null {
   const candidates = [r.subcat2, r.subcat1, r.category].filter((value): value is string => Boolean(value));
-  const keys = Object.keys(NON_MOVING_THRESHOLDS).sort((a, b) => normalize(b).length - normalize(a).length);
   for (const candidate of candidates) {
     const code = candidate.match(/^\s*(\d{2,6})/)?.[1];
     if (code) {
@@ -14,8 +17,9 @@ export function nonMovingThresholdDays(r: Pick<SkuInput, 'category' | 'subcat1' 
         if (threshold != null) return threshold;
       }
     }
-    const key = keys.find((item) => !/^\d/.test(item) && normalize(candidate).includes(normalize(item)));
-    if (key) return NON_MOVING_THRESHOLDS[key as keyof typeof NON_MOVING_THRESHOLDS];
+    const normalizedCandidate = normalize(candidate);
+    const match = NON_NUMERIC_THRESHOLDS.find((item) => normalizedCandidate.includes(item.normalized));
+    if (match) return match.days;
   }
   return null;
 }
@@ -25,23 +29,54 @@ export function weeklySalesEven(weeklyUnits?: readonly number[]): boolean | null
   return weeklyUnits.every((units) => Number.isFinite(units) && units > 0);
 }
 
-export function salesMotion(r: Pick<SkuInput, 'sku' | 'category' | 'subcat1' | 'subcat2' | 'storeType' | 'inStockDays' | 'notDisplayedDays' | 'weeklyUnits' | 'units' | 'oosDays' | 'days' | 'lifecycle' | 'seasonal' | 'promotion'>, peerRows: readonly typeof r[], periodDays: number): { motion: SalesMotion; thresholdDays: number | null; weeklyEven: boolean | null } {
-  const thresholdDays = nonMovingThresholdDays(r);
-  const baseDays = r.days > 0 ? r.days : periodDays;
-  const availableDays = Math.max(0, (r.inStockDays ?? Math.max(0, baseDays - Math.max(0, r.oosDays))) - Math.max(0, r.notDisplayedDays ?? 0));
-  if (r.lifecycle === 'New' || r.seasonal || r.promotion) return { motion: 'Unknown', thresholdDays, weeklyEven: weeklySalesEven(r.weeklyUnits) };
-  if (thresholdDays != null && r.units <= 0 && availableDays >= thresholdDays) return { motion: 'Non-moving', thresholdDays, weeklyEven: weeklySalesEven(r.weeklyUnits) };
-  const weeklyEven = weeklySalesEven(r.weeklyUnits);
-  if (weeklyEven === false || r.units <= 0) return { motion: r.units > 0 ? 'Slow' : 'Unknown', thresholdDays, weeklyEven };
-  const peerKey = (x: typeof r) => `${normalize(x.subcat2 || x.subcat1 || x.category)}|${normalize(x.storeType || 'unknown')}`;
-  const peers = peerRows.filter((x) => peerKey(x) === peerKey(r) && x.units > 0 && x.lifecycle === 'Active' && !x.seasonal && !x.promotion).map((x) => {
-    const base = x.days > 0 ? x.days : periodDays;
-    const available = Math.max(1, (x.inStockDays ?? Math.max(1, base - Math.max(0, x.oosDays))) - Math.max(0, x.notDisplayedDays ?? 0));
-    return { row: x, ads: x.units / available };
-  }).sort((a, b) => b.ads - a.ads);
-  const rank = peers.findIndex((x) => x.row.sku === r.sku) + 1;
-  if (peers.length < SALES_MOTION_THRESHOLDS.minimumPeers) return { motion: 'Unknown', thresholdDays, weeklyEven };
-  return { motion: rank > 0 && rank <= Math.ceil(peers.length * SALES_MOTION_THRESHOLDS.fastPeerShare) ? 'Fast' : 'Slow', thresholdDays, weeklyEven };
+type SalesMotionRow = Pick<SkuInput, 'sku' | 'category' | 'subcat1' | 'subcat2' | 'storeType' | 'inStockDays' | 'notDisplayedDays' | 'weeklyUnits' | 'units' | 'oosDays' | 'days' | 'lifecycle' | 'seasonal' | 'promotion'>;
+type SalesMotionResult = { motion: SalesMotion; thresholdDays: number | null; weeklyEven: boolean | null };
+
+const salesMotionPeerKey = (r: SalesMotionRow) => `${normalize(r.subcat2 || r.subcat1 || r.category)}|${normalize(r.storeType || 'unknown')}`;
+
+/** Index peer ranks once so a dataset with many SKUs does not rescan and sort each cohort per row. */
+export function createSalesMotionClassifier(peerRows: readonly SalesMotionRow[], periodDays: number) {
+  const cohorts = new Map<string, { size: number; rankBySku: Map<string, number> }>();
+  const peersByCohort = new Map<string, { row: SalesMotionRow; ads: number; index: number }[]>();
+
+  peerRows.forEach((row, index) => {
+    if (row.units <= 0 || row.lifecycle !== 'Active' || row.seasonal || row.promotion) return;
+    const key = salesMotionPeerKey(row);
+    const peers = peersByCohort.get(key) ?? [];
+    const base = row.days > 0 ? row.days : periodDays;
+    const available = Math.max(1, (row.inStockDays ?? Math.max(1, base - Math.max(0, row.oosDays))) - Math.max(0, row.notDisplayedDays ?? 0));
+    peers.push({ row, ads: row.units / available, index });
+    peersByCohort.set(key, peers);
+  });
+
+  for (const [key, peers] of peersByCohort) {
+    peers.sort((a, b) => b.ads - a.ads || a.index - b.index);
+    const rankBySku = new Map<string, number>();
+    peers.forEach(({ row }, index) => {
+      // Preserve findIndex semantics for duplicate SKU codes in the same cohort.
+      if (!rankBySku.has(row.sku)) rankBySku.set(row.sku, index + 1);
+    });
+    cohorts.set(key, { size: peers.length, rankBySku });
+  }
+
+  return (r: SalesMotionRow): SalesMotionResult => {
+    const thresholdDays = nonMovingThresholdDays(r);
+    const baseDays = r.days > 0 ? r.days : periodDays;
+    const availableDays = Math.max(0, (r.inStockDays ?? Math.max(0, baseDays - Math.max(0, r.oosDays))) - Math.max(0, r.notDisplayedDays ?? 0));
+    if (r.lifecycle === 'New' || r.seasonal || r.promotion) return { motion: 'Unknown', thresholdDays, weeklyEven: weeklySalesEven(r.weeklyUnits) };
+    if (thresholdDays != null && r.units <= 0 && availableDays >= thresholdDays) return { motion: 'Non-moving', thresholdDays, weeklyEven: weeklySalesEven(r.weeklyUnits) };
+    const weeklyEven = weeklySalesEven(r.weeklyUnits);
+    if (weeklyEven === false || r.units <= 0) return { motion: r.units > 0 ? 'Slow' : 'Unknown', thresholdDays, weeklyEven };
+
+    const cohort = cohorts.get(salesMotionPeerKey(r));
+    if (!cohort || cohort.size < SALES_MOTION_THRESHOLDS.minimumPeers) return { motion: 'Unknown', thresholdDays, weeklyEven };
+    const rank = cohort.rankBySku.get(r.sku) ?? 0;
+    return { motion: rank > 0 && rank <= Math.ceil(cohort.size * SALES_MOTION_THRESHOLDS.fastPeerShare) ? 'Fast' : 'Slow', thresholdDays, weeklyEven };
+  };
+}
+
+export function salesMotion(r: SalesMotionRow, peerRows: readonly SalesMotionRow[], periodDays: number): SalesMotionResult {
+  return createSalesMotionClassifier(peerRows, periodDays)(r);
 }
 
 export function velocityByAds(ads: number): Velocity {

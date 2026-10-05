@@ -11,7 +11,7 @@ Trái tim nghiệp vụ. Engine thuần TS + Pinia store. Public API: `features/
 | `model/thresholds.ts` | `THRESHOLDS` và `DEFAULT_SETTINGS` ABC CVS (56 ngày, A 70%, B 90%), `PILOT_THRESHOLDS` riêng cho dashboard `/pilot` theo Lark (ABC 80/95%, Growth, Margin Index, Price Index, Stockday), `SALES_MOTION_THRESHOLDS` và `NON_MOVING_THRESHOLDS` theo ngành Ohmee, `sanitizeSettings` |
 | `engine/metrics.ts` | `computeBaseMetrics`, `comparePrevious`, `categoryAverageAds`; ADS dùng số ngày thực sự có hàng sau khi loại ngày chưa bày |
 | `engine/abc.ts` | `salesValue`, `assignAbc`, `assignAbcByCategory` (Pareto theo Sales riêng từng ngành) |
-| `engine/classify.ts` | `velocityByAds`, `velocityByIndex`, `dosStatus`, `oosStatus`, `trendStatus`, `isCoreSku`, `salesMotion`, `nonMovingThresholdDays`, `weeklySalesEven` |
+| `engine/classify.ts` | `velocityByAds`, `velocityByIndex`, `dosStatus`, `oosStatus`, `trendStatus`, `isCoreSku`, `createSalesMotionClassifier` (xếp peer theo cohort một lần), `salesMotion`, `nonMovingThresholdDays` (chuẩn bị sẵn thứ tự ngưỡng theo ngành), `weeklySalesEven` |
 | `engine/actions.ts` | `decideAction` (rule engine), trả `rule` id + group + action + reasons |
 | `engine/analyze.ts` | `analyzeSkus` pipeline |
 | `engine/pilotDashboard.ts` | `analyzePilotSkus(rows, selectedMonths?)`: tính ABC, Growth giữa hai tháng chọn cuối hoặc giữa tháng chọn duy nhất và tháng liền trước, Margin, Price, Stockday theo số ngày kỳ chọn và nhãn Status; không tính DIO hoặc Action |
@@ -30,6 +30,7 @@ Trái tim nghiệp vụ. Engine thuần TS + Pinia store. Public API: `features/
 - Velocity ADS: ≥20 Fast, ≥15 Normal, >5 Slow, còn lại Very Slow (ngưỡng liên tục, lấp khe 5-6, 14-15, 19-20 của tài liệu).
 - Velocity Index: ≥100% Fast, ≥70% Normal, ≥30% Slow.
 - Sales motion mới: Fast là top 25% ADS trong cùng ngành hàng con + loại cửa hàng (ít nhất 4 SKU đối chiếu); khi có dữ liệu tuần thì mọi tuần phải có bán. Nếu không có dữ liệu tuần, xếp theo tốc độ tương đối và không khẳng định độ đều. Có bán nhưng không đạt điều kiện là Slow. Non-moving là không bán đủ ngưỡng ngày có hàng theo `NON_MOVING_THRESHOLDS`; ngày OOS và ngày chưa bày bán bị loại khỏi mẫu số. New/Seasonal/Promotion và nhóm thiếu dữ liệu đối chiếu trả Unknown.
+- `createSalesMotionClassifier` tạo peer cohort và xếp hạng một lần cho mỗi lần chạy pipeline; thứ tự ngưỡng ngành cũng được chuẩn bị sẵn, tránh lặp xử lý cho từng SKU.
 - Core: A + ADS ≥ 20 + Index ≥ 70% + OOS ≤ 10% + không EOL.
 - DOS: ≤7, ≤15, ≤30, ≤60, ≤90, >90. ADS = 0 và còn tồn → Infinity (Overstock); không tồn → N/A.
 - OOS > 20%: Growth so kỳ trước bằng nhu cầu dự kiến (ADS x days).
