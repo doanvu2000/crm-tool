@@ -52,12 +52,12 @@ Dashboard Pilot là website tĩnh riêng tại `/pilot.html`; không dùng store
 ```
 CSV/XLS/XLSX hoặc dữ liệu mẫu
   → import/readSheet → sku-pilot/lib/pilotImport → PilotSkuInput[]
-  → selectedMonths → analysis/engine/pilotDashboard (ABC → Growth → Margin → Price → DOS/DIO → Status)
-  → filter chung / lọc chéo từ chart và bảng → KPI, biểu đồ, Category Overview tìm/sắp xếp, SKU Detail lọc/phân trang, DIO dashboard
+  → selectedMonths → analysis/engine/pilotDashboard (ABC → Growth → Margin → Price → Stockday → Status)
+  → filter chung / lọc chéo từ chart và bảng → KPI, biểu đồ, Category Overview tìm/sắp xếp, SKU Detail lọc/phân trang
   ↔ IndexedDB crm-tool-sku-pilot/workspace/latest
 ```
 
-Luồng này chỉ tính và hiển thị chỉ số/trạng thái theo tài liệu Lark; không có Action hoặc recommendation. COGS khoảng tháng con được ước tính theo tỷ trọng doanh thu khi file chỉ cung cấp COGS tổng 3 tháng. Theme Pilot dùng `sku-pilot-theme` và palette chung.
+Luồng này chỉ tính và hiển thị chỉ số/trạng thái theo tài liệu Lark; Stockday lấy tồn hiện tại theo số lượng chia cho lượng bán bình quân ngày trong khoảng chọn, quy ước 30 ngày kinh doanh mỗi tháng. Không có DIO, Action hoặc recommendation. Theme Pilot dùng `sku-pilot-theme` và palette chung.
 
 Khi nạp dữ liệu hoặc sửa/xoá dòng, store lưu bản phân tích gần nhất vào IndexedDB cục bộ. `main.ts` khôi phục bản này trước khi mount ứng dụng; nếu bộ nhớ trình duyệt không khả dụng, app tiếp tục chạy với state trống. Settings cũng được giữ lại cùng dữ liệu, còn filter hiển thị được khởi tạo lại mặc định.
 

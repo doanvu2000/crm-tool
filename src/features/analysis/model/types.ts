@@ -105,15 +105,13 @@ export interface PilotSkuInput {
   sellingPrice: number;
   inventoryQty: number;
   inventoryValue: number;
-  openingInventoryValue: number | null;
-  cogs3m: number;
 }
 
 export type PilotAbc = 'A' | 'B' | 'C';
 export type PilotGrowthStatus = 'Strong Growth' | 'Growth' | 'Stable' | 'Decline' | 'Sharp Decline' | 'N/A';
 export type PilotMarginStatus = 'High Margin' | 'Healthy' | 'Low Margin' | 'Very Low Margin' | 'N/A';
 export type PilotPriceSegment = 'Premium' | 'Mid-High' | 'Mid-Low' | 'Entry' | 'N/A';
-export type PilotDosStatus = 'Very Low Stock' | 'Low Stock' | 'Healthy Stock' | 'High Stock' | 'Overstock' | 'N/A';
+export type PilotStockDayStatus = 'Very Low Stock' | 'Low Stock' | 'Healthy Stock' | 'High Stock' | 'Overstock' | 'N/A';
 export type PilotSkuStatus = 'CORE' | 'GROWTH AT RISK' | 'CORE / OVERSTOCK' | 'SALES DRIVER / LOW MARGIN' | 'DECLINE' | 'SLOW / EXCESS' | 'Regular';
 
 export interface PilotSkuResult extends PilotSkuInput {
@@ -132,9 +130,7 @@ export interface PilotSkuResult extends PilotSkuInput {
   priceIndex: number | null;
   priceSegment: PilotPriceSegment;
   averageDailySales: number;
-  dos: number | null;
-  dosStatus: PilotDosStatus;
-  dio: number | null;
-  dioBasis: 'DIO' | 'Inventory Days' | 'N/A';
+  stockDays: number | null;
+  stockDayStatus: PilotStockDayStatus;
   status: PilotSkuStatus;
 }

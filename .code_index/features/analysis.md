@@ -6,15 +6,15 @@ Trái tim nghiệp vụ. Engine thuần TS + Pinia store. Public API: `features/
 
 | File | Trách nhiệm |
 |---|---|
-| `model/types.ts` | Hằng thứ tự (`ABC_CLASSES`, `VELOCITY_LEVELS`, `DOS_LEVELS`, `OOS_LEVELS`, `TREND_LEVELS`, `ACTION_GROUPS`, `LIFECYCLES`) + type `SkuInput` (có `category`, `subcat1?`, `subcat2?`), `AnalysisSettings`, kết quả engine cũ và `PilotSkuInput`/`PilotSkuResult` (Margin và Margin trung bình Category) cho dashboard 3 tháng |
+| `model/types.ts` | Hằng thứ tự (`ABC_CLASSES`, `VELOCITY_LEVELS`, `DOS_LEVELS`, `OOS_LEVELS`, `TREND_LEVELS`, `ACTION_GROUPS`, `LIFECYCLES`) + type `SkuInput` (có `category`, `subcat1?`, `subcat2?`), `AnalysisSettings`, kết quả engine cũ và `PilotSkuInput`/`PilotSkuResult` (Margin, Margin trung bình Category và Stockday) cho dashboard 3 tháng |
 | `model/actionRules.ts` | `ACTION_RULES` (id, stage, when, group, action) theo đúng thứ tự xét, `ActionRuleId`, `ACTION_RULE_BY_ID`. `decideAction` lấy group/action từ đây nên bảng Quy tắc luôn khớp engine |
-| `model/thresholds.ts` | `THRESHOLDS` và `DEFAULT_SETTINGS` ABC CVS (56 ngày, A 70%, B 90%), `PILOT_THRESHOLDS` riêng cho dashboard `/pilot` theo Lark (ABC 80/95%, Growth, Margin Index, Price Index, DOS), `sanitizeSettings` |
+| `model/thresholds.ts` | `THRESHOLDS` và `DEFAULT_SETTINGS` ABC CVS (56 ngày, A 70%, B 90%), `PILOT_THRESHOLDS` riêng cho dashboard `/pilot` theo Lark (ABC 80/95%, Growth, Margin Index, Price Index, Stockday), `sanitizeSettings` |
 | `engine/metrics.ts` | `computeBaseMetrics`, `comparePrevious`, `categoryAverageAds` |
 | `engine/abc.ts` | `salesValue`, `assignAbc`, `assignAbcByCategory` (Pareto theo Sales riêng từng ngành) |
 | `engine/classify.ts` | `velocityByAds`, `velocityByIndex`, `dosStatus`, `oosStatus`, `trendStatus`, `isCoreSku` |
 | `engine/actions.ts` | `decideAction` (rule engine), trả `rule` id + group + action + reasons |
 | `engine/analyze.ts` | `analyzeSkus` pipeline |
-| `engine/pilotDashboard.ts` | `analyzePilotSkus(rows, selectedMonths?)`: tính ABC, Growth giữa hai tháng chọn cuối hoặc giữa tháng chọn duy nhất và tháng liền trước, Margin, Price, DOS theo số ngày kỳ chọn, DIO/Inventory Days và nhãn Status; không tính Action |
+| `engine/pilotDashboard.ts` | `analyzePilotSkus(rows, selectedMonths?)`: tính ABC, Growth giữa hai tháng chọn cuối hoặc giữa tháng chọn duy nhất và tháng liền trước, Margin, Price, Stockday theo số ngày kỳ chọn và nhãn Status; không tính DIO hoặc Action |
 | `engine/aggregate.ts` | `countBy`, `sumBy` |
 | `engine/analyze.test.ts` | Vitest cho biên ngưỡng, ABC, Severe OOS, EOL, Core, Overstock và lọc đa ngành / tổng tất cả ngành |
 | `store/analysisStore.ts` | `useAnalysisStore` (state: raw, original, removed, sourceLabel, settings, selectedCategories, selectedSubcat1, selectedSubcat2, actionFilter; drill; getters: activeRaw, rows, categoryRows (lọc theo 3 cấp ngành hàng), visibleRows, crossRows, matrixRows, hasDrill, editedIndexes, editedCount, removedCount, baselineRows; actions: setData, restoreSavedData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategories, setSubcat1, setSubcat2, toggleCategory, selectAllCategories, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill). `selectedCategories` rỗng nghĩa là tổng tất cả ngành; thay đổi dữ liệu và settings được lưu cục bộ |

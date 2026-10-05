@@ -24,8 +24,6 @@ export function generatePilotSample(): PilotSkuInput[] {
     return {
       sku: `PIL-${String(i + 1).padStart(3, '0')}`, name, category, salesQty, revenue, profit,
       monthlyAvailable: true, sellingPrice: price, inventoryQty, inventoryValue,
-      openingInventoryValue: inventoryValue * (item % 2 ? 1.08 : 0.94),
-      cogs3m: revenue.reduce((a, b) => a + b, 0) * (1 - margin)
     };
   }));
 }

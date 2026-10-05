@@ -7,9 +7,7 @@ const fields = {
   category: ['category', 'nganhhang', 'nganh', 'danhmuc'],
   sellingPrice: ['sellingprice', 'giaban', 'asp', 'averageprice'],
   inventoryQty: ['inventoryqty', 'endingstockqty', 'stock', 'tonkho', 'soluongton'],
-  inventoryValue: ['inventoryvalue', 'endinginventoryvalue', 'tonkhogiatri', 'giatritonkho'],
-  openingInventoryValue: ['openinginventoryvalue', 'beginninginventoryvalue', 'tondaikygiatri'],
-  cogs3m: ['cogs3m', 'cogs', 'costofgoodssold', 'giavon']
+  inventoryValue: ['inventoryvalue', 'endinginventoryvalue', 'tonkhogiatri', 'giatritonkho']
 } as const;
 
 const monthlyAliases = (kind: 'salesqty' | 'revenue' | 'profit', month: number) => {
@@ -54,9 +52,7 @@ export function mapPilotRows(rows: Record<string, unknown>[]): PilotSkuInput[] {
       monthlyAvailable,
       sellingPrice: parseNum(find(row, fields.sellingPrice)),
       inventoryQty: parseNum(find(row, fields.inventoryQty)),
-      inventoryValue: parseNum(find(row, fields.inventoryValue)),
-      openingInventoryValue: find(row, fields.openingInventoryValue) === undefined ? null : parseNum(find(row, fields.openingInventoryValue)),
-      cogs3m: parseNum(find(row, fields.cogs3m))
+      inventoryValue: parseNum(find(row, fields.inventoryValue))
     });
   }
   if (mapped.length === 0) throw new Error('Không tìm thấy dòng có mã SKU. Kiểm tra lại tên cột SKU.');
@@ -67,7 +63,7 @@ export function downloadPilotTemplate() {
   const header = [
     'sku', 'name', 'category', 'sales_qty_m1', 'sales_qty_m2', 'sales_qty_m3',
     'revenue_m1', 'revenue_m2', 'revenue_m3', 'profit_m1', 'profit_m2', 'profit_m3',
-    'selling_price', 'inventory_qty', 'inventory_value', 'opening_inventory_value', 'cogs_3m'
+    'selling_price', 'inventory_qty', 'inventory_value'
   ];
   const blob = new Blob([`\uFEFF${header.join(',')}\n`], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);

@@ -1,8 +1,6 @@
 import { PILOT_THRESHOLDS as T } from '../model/thresholds';
 import type { PilotSkuInput, PilotSkuResult, PilotSkuStatus } from '../model/types';
 
-const sum = (values: readonly number[]) => values.reduce((total, value) => total + value, 0);
-
 /** Pure selected-period dashboard calculation. It reports measures and status only. */
 export function analyzePilotSkus(rows: readonly PilotSkuInput[], selectedMonths: readonly number[] = [0, 1, 2]): PilotSkuResult[] {
   const months = [...new Set(selectedMonths)].filter((month) => Number.isInteger(month) && month >= 0 && month < 3).sort((a, b) => a - b);
@@ -50,29 +48,22 @@ export function analyzePilotSkus(rows: readonly PilotSkuInput[], selectedMonths:
       : priceIndex >= T.priceIndex.midHigh ? 'Mid-High' : priceIndex >= T.priceIndex.midLow ? 'Mid-Low' : 'Entry';
 
     const averageDailySales = totalQty3m / periodDays;
-    const dos = averageDailySales > 0 ? row.inventoryQty / averageDailySales : null;
-    const dosStatus = dos == null ? 'N/A' : dos <= T.dos.veryLow ? 'Very Low Stock' : dos <= T.dos.low ? 'Low Stock'
-      : dos <= T.dos.healthy ? 'Healthy Stock' : dos <= T.dos.high ? 'High Stock' : 'Overstock';
-    const inventoryBase = row.openingInventoryValue == null ? row.inventoryValue : (row.openingInventoryValue + row.inventoryValue) / 2;
-    // When the import has only one 3-month COGS value, estimate selected-period COGS
-    // proportionally from revenue; imports with monthly COGS can be added later.
-    const revenue3m = sum(row.revenue);
-    const selectedCogs = row.cogs3m * (revenue3m > 0 ? sales3m / revenue3m : months.length / 3);
-    const dio = selectedCogs > 0 ? inventoryBase / selectedCogs * periodDays : null;
-    const dioBasis = dio == null ? 'N/A' : row.openingInventoryValue == null ? 'Inventory Days' : 'DIO';
+    const stockDays = averageDailySales > 0 ? row.inventoryQty / averageDailySales : null;
+    const stockDayStatus = stockDays == null ? 'N/A' : stockDays <= T.stockDays.veryLow ? 'Very Low Stock' : stockDays <= T.stockDays.low ? 'Low Stock'
+      : stockDays <= T.stockDays.healthy ? 'Healthy Stock' : stockDays <= T.stockDays.high ? 'High Stock' : 'Overstock';
 
     let status: PilotSkuStatus = 'Regular';
-    if (abc === 'A' && growth != null && growth >= T.status.coreGrowthFloor && dosStatus === 'Healthy Stock') status = 'CORE';
-    else if ((abc === 'A' || abc === 'B') && growth != null && growth > T.status.growthAtRiskFloor && dos != null && dos <= T.status.growthAtRiskMaxDos) status = 'GROWTH AT RISK';
-    else if (abc === 'A' && dos != null && dos > T.status.overstockDosFloor) status = 'CORE / OVERSTOCK';
+    if (abc === 'A' && growth != null && growth >= T.status.coreGrowthFloor && stockDayStatus === 'Healthy Stock') status = 'CORE';
+    else if ((abc === 'A' || abc === 'B') && growth != null && growth > T.status.growthAtRiskFloor && stockDays != null && stockDays <= T.status.growthAtRiskMaxStockDays) status = 'GROWTH AT RISK';
+    else if (abc === 'A' && stockDays != null && stockDays > T.status.overstockStockDaysFloor) status = 'CORE / OVERSTOCK';
     else if (abc === 'A' && marginIndex != null && marginIndex < T.status.lowMarginCeiling) status = 'SALES DRIVER / LOW MARGIN';
     else if ((abc === 'A' || abc === 'B') && growth != null && growth < T.status.declineCeiling) status = 'DECLINE';
-    else if (abc === 'C' && growth != null && growth < T.status.slowExcessGrowthCeiling && dos != null && dos > T.status.overstockDosFloor) status = 'SLOW / EXCESS';
+    else if (abc === 'C' && growth != null && growth < T.status.slowExcessGrowthCeiling && stockDays != null && stockDays > T.status.overstockStockDaysFloor) status = 'SLOW / EXCESS';
 
     return {
       ...row, sales3m, totalQty3m, salesShare, cumulativeSalesShare: cumulative, abc,
       growth, growthStatus, margin, categoryMargin, marginIndex, marginStatus, asp, priceIndex, priceSegment,
-      averageDailySales, dos, dosStatus, dio, dioBasis, status
+      averageDailySales, stockDays, stockDayStatus, status
     };
   });
 }

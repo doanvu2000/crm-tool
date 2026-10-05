@@ -2,7 +2,7 @@
 
 ## sku-pilot (`/pilot.html`)
 - `features/sku-pilot/PilotApp.vue` ghép `SkuPilotDashboard` và `PilotHeader.vue`, chạy như website tĩnh riêng, dùng token giao diện hiện tại.
-- Dashboard có import CSV/XLS/XLSX, chọn nhiều tháng, lọc chéo trên chart/bảng, Category Overview tìm/sắp xếp, SKU Detail có bộ lọc, và DIO Dashboard đứng trước Tình trạng DOS.
+- Dashboard có import CSV/XLS/XLSX, chọn nhiều tháng, lọc chéo trên chart/bảng, Category Overview tìm/sắp xếp, SKU Detail có bộ lọc và phân bố Stockday.
 - Dữ liệu cuối được lưu riêng trong IndexedDB; dữ liệu mẫu nạp khi chưa có dữ liệu đã lưu.
 - Chỉ hiển thị chỉ số và Status, không có Action hoặc recommendation.
 
