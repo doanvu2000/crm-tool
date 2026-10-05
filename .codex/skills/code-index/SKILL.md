@@ -18,7 +18,16 @@ Read the existing index in this order:
 3. The relevant feature document in `.code_index/features/`
 4. Relevant graph/design documents when the change affects dependencies, data flow, or UI
 
-For any UI change, also use the `ui-ux-pro-max` skill at `C:\Users\dungn\.codex\skills\ui-ux-pro-max\SKILL.md` and read `.code_index/design.md` before making design decisions. Treat the existing web style as the source of truth: reuse its tokens, typography, spacing, layout, dark-mode behavior, component patterns, and interaction patterns. Do not introduce a new visual direction unless the user explicitly requests a redesign.
+For any UI change, read `.code_index/design.md` and apply the project-local UI skill at `.agents/skills/ui-ux/SKILL.md` before making design decisions. If the project or affected feature has no defined style, use both `/frontend-design:frontend-design` and `/ui-ux-pro-max:ui-ux-pro-max` (the latter is available at `C:\Users\dungn\.codex\skills\ui-ux-pro-max\SKILL.md` in this environment). If a requested skill is unavailable, state that limitation and use the existing project style as the fallback. Treat the existing web style as the source of truth: reuse its tokens, typography, spacing, layout, dark-mode behavior, component patterns, and interaction patterns. Do not introduce a new visual direction unless the user explicitly requests a redesign.
+
+Frontend defaults when no existing style is defined:
+
+- Use Tailwind CSS utilities and semantic tokens; avoid scattered custom CSS.
+- Use Google Sans for UI text and Google Sans Code for code/SKU/numeric content when appropriate.
+- Support dark/light mode with a theme toggle in the header, using the project's existing theme mechanism.
+- Build responsive layouts with clearly separated content blocks/sections and clean, simple, readable content.
+- Avoid horizontal overflow unless the requirement needs it; follow the existing table/data overflow pattern for wide data.
+- When there are multiple sections, provide navigation with a horizontal top menu preferred, and keep it sticky while scrolling.
 
 Use the index to locate the correct feature boundary and existing public API. Preserve the architecture rules documented there:
 
@@ -46,7 +55,7 @@ Use this routing table:
 
 If the code change has no architectural/index impact, verify that conclusion and leave the index untouched. Update the `Cập nhật lần cuối` date in `.code_index/README.md` when index content changes, using the current project date.
 
-For UI changes, ensure the implementation remains visually consistent with the existing web and that the `ui-ux-pro-max` guidance covers responsive behavior, accessibility, focus/keyboard interaction, and loading/error states.
+For UI changes, ensure the implementation remains visually consistent with the existing web and that the applicable design skills cover responsive behavior, accessibility, focus/keyboard interaction, theme switching, and loading/error states.
 
 ## Verification
 

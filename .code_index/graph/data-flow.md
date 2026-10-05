@@ -35,6 +35,8 @@ Dữ liệu mẫu ─────┤─ import/lib/sampleData.ts
         shared/charts/ChartCanvas.vue (config computed theo rows + palette)
 ```
 
+Pipeline tương đương trong Excel: bảng `SkuInput` → `power-query/SkuAnalysis.pq` → một bảng kết quả chứa metrics, ABC, classification và Action. Query chạy độc lập với SPA; các thiết lập nằm ở đầu query.
+
 Lịch sử doanh thu theo tháng có luồng riêng, không đi qua engine phân tích SKU:
 
 ```

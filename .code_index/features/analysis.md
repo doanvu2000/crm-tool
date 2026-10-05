@@ -19,6 +19,7 @@ Trái tim nghiệp vụ. Engine thuần TS + Pinia store. Public API: `features/
 | `engine/analyze.test.ts` | Vitest cho biên ngưỡng, ABC, Severe OOS, EOL, Core, Overstock và lọc đa ngành / tổng tất cả ngành |
 | `store/analysisStore.ts` | `useAnalysisStore` (state: raw, original, removed, sourceLabel, settings, selectedCategories, selectedSubcat1, selectedSubcat2, actionFilter; drill; getters: activeRaw, rows, categoryRows (lọc theo 3 cấp ngành hàng), visibleRows, crossRows, matrixRows, hasDrill, editedIndexes, editedCount, removedCount, baselineRows; actions: setData, restoreSavedData, updateRow, resetRow, removeRow, restoreRow, resetAll, updateSettings, setCategories, setSubcat1, setSubcat2, toggleCategory, selectAllCategories, setActionFilter, setDrill, toggleDrill, setDrillPair, clearDrill). `selectedCategories` rỗng nghĩa là tổng tất cả ngành; thay đổi dữ liệu và settings được lưu cục bộ |
 | `store/analysisPersistence.ts` | Lưu và đọc bản phân tích gần nhất từ IndexedDB trên trình duyệt, gồm dữ liệu gốc, sửa/xoá, nhãn nguồn và settings |
+| `power-query/SkuAnalysis.pq` | Bản triển khai Power Query M của pipeline SKU Analysis CVS; đọc bảng Excel `SkuInput`, mặc định 56 ngày, ABC 70/90 và velocity theo ADS |
 
 ## Rules (theo `Nguyên tắc xây  dựng Analysis.md`, kèm cách hiểu đã chốt)
 

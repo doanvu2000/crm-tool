@@ -58,6 +58,8 @@ src/
 └── assets/styles/main.css  Tailwind + @theme font + component classes (.card, .btn, .chip...)
 ```
 
+Tương thích Excel: `power-query/SkuAnalysis.pq` triển khai pipeline SKU Analysis CVS thành một query M độc lập đọc bảng Excel `SkuInput`.
+
 ## Quy tắc tầng
 
 - `pages` → `features/*` → `features/analysis` → `shared`. Không đi ngược.

@@ -107,5 +107,13 @@ Tăng trưởng = \(số bán hiện tại \- số bán cùng kì\)/số bán c�
 
 ### 9\. Action 
 
+### 10\. Fast / Slow / Non-moving theo ngành hàng con và loại cửa hàng
+
+- **Fast**: tốc độ bán theo đơn vị/cửa hàng/ngày nằm trong nhóm 25% cao nhất của cùng ngành hàng con và cùng loại cửa hàng, đồng thời bán đều qua các tuần có dữ liệu.
+- **Slow**: vẫn có bán nhưng tốc độ thấp hoặc bán cách quãng.
+- **Non-moving**: không có bán trong số ngày cửa hàng thực sự có hàng. Đây là cờ để rà soát, chưa tự động ngừng nhập.
+- Ngày hết hàng và ngày SKU chưa được bày bán phải loại khỏi mẫu số. SKU mới, hàng khuyến mại và hàng theo mùa cần xét riêng.
+
+Ngưỡng Non-moving mặc định được lưu tại `src/features/analysis/model/thresholds.ts` theo ngành hàng Ohmee. Các ngưỡng này chỉ là cờ rà soát, không tự động delist hoặc Stop PO.
 
 
