@@ -9,7 +9,7 @@
 | `lib/mapRows.ts` | Map header → `SkuInput`, đọc subcategory và metadata Fast/Slow/Non-moving tùy chọn, báo thiếu cột bắt buộc bằng `ImportError` |
 | `lib/readSheet.ts` | `ACCEPTED_FILE`, `readSheet` (dynamic import `xlsx`) |
 | `lib/sampleData.ts` | `generateSampleData(perCategory, seed)` PRNG mulberry32, 4 ngành với cây Subcat 1/2 mẫu |
-| `lib/template.ts` | `downloadTemplate`, xuất CSV mẫu theo 3 cấp ngành hàng |
+| `lib/template.ts` | `downloadTemplate`, xuất XLSX mẫu với từng trường ở một cột và dữ liệu mẫu theo 3 cấp ngành hàng |
 
 Cột bắt buộc: sku, revenue, units, unitsPrev, stock. `revenuePrev` (`revenue_prev`) tuỳ chọn: thiếu thì engine ước tính.
 `ImportPanel`: nút `data-tour="sample"`, card `data-tour="import"`, có dữ liệu thì hiện nút "Xem và sửa dữ liệu" cuộn tới #input. Alias so khớp sau `normalizeKey` (bỏ dấu, lowercase).
