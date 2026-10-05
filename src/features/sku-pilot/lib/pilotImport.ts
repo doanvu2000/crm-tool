@@ -79,17 +79,23 @@ export function mapPilotRows(rows: Record<string, unknown>[]): PilotSkuInput[] {
   return mapped;
 }
 
-export function downloadPilotTemplate() {
+export async function downloadPilotTemplate() {
+  const XLSX = await import('xlsx');
   const header = [
     'sku', 'name', 'category', 'sales_qty_m1', 'sales_qty_m2', 'sales_qty_m3',
     'revenue_m1', 'revenue_m2', 'revenue_m3', 'profit_m1', 'profit_m2', 'profit_m3',
     'selling_price', 'inventory_qty', 'inventory_value', 'subcat1', 'subcat2', 'store_type', 'in_stock_days', 'not_displayed_days', 'weekly_units', 'lifecycle', 'seasonal', 'promotion'
   ];
-  const blob = new Blob([`\uFEFF${header.join(',')}\n`], { type: 'text/csv;charset=utf-8' });
+  const workbook = XLSX.utils.book_new();
+  const sheet = XLSX.utils.aoa_to_sheet([header]);
+  XLSX.utils.book_append_sheet(workbook, sheet, 'SKU Pilot');
+  const blob = new Blob([XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = 'sku-pilot-template.csv';
+  anchor.download = 'sku-pilot-template.xlsx';
   anchor.click();
   URL.revokeObjectURL(url);
 }

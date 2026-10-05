@@ -10,7 +10,7 @@ Website dashboard riêng tại `/pilot.html` theo tài liệu Lark “Nguyên t�
 | `PilotApp.vue` | Root component của website Pilot, không dùng App.vue/router của website cũ |
 | `components/PilotHeader.vue` | Header riêng, công tắc theme và liên kết quay về web SKU Analysis cũ |
 | `composables/usePilotTheme.ts` | Theme và palette riêng theo `sku-pilot-theme`; cập nhật màu chart qua palette dùng chung mà không ghi preference `sku-theme` |
-| `lib/pilotImport.ts` | Map alias cột dữ liệu 3 tháng và metadata ngành hàng con/loại cửa hàng/ngày có hàng/số bán theo tuần, tải template CSV |
+| `lib/pilotImport.ts` | Map alias cột dữ liệu 3 tháng và metadata ngành hàng con/loại cửa hàng/ngày có hàng/số bán theo tuần, tải template XLSX |
 | `lib/sampleData.ts` | Dữ liệu mẫu cố định cho dashboard khi chạy lần đầu |
 | `lib/pilotPersistence.ts` | Lưu bộ dữ liệu gần nhất riêng trong IndexedDB `crm-tool-sku-pilot` |
 
@@ -23,6 +23,7 @@ Website dashboard riêng tại `/pilot.html` theo tài liệu Lark “Nguyên t�
 - Status chỉ là nhãn mô tả để xem/lọc; không có bảng Recommendation/Action.
 - Sales motion dùng chung engine: Fast là top 25% ADS cùng ngành hàng con + loại cửa hàng, cần ít nhất 4 SKU đối chiếu; nếu có dữ liệu tuần thì SKU phải bán đều theo tuần. Slow có bán nhưng không đạt Fast. Non-moving dùng ngưỡng Ohmee theo số ngày có hàng, loại ngày chưa bày bán. New/Seasonal/Promotion và nhóm chưa đủ SKU đối chiếu được giữ `Unknown`. Box dashboard tổng hợp theo bộ lọc hiện hành, hiển thị ngưỡng Non-moving ở từng ngành hàng và cho lọc chéo.
 - Data import chạy hoàn toàn trong trình duyệt; file hỗ trợ CSV/XLS/XLSX. Chọn nhiều tháng để cập nhật số tổng và các chỉ số theo kỳ; Growth dùng hai tháng được chọn gần nhất, hoặc tháng liền trước khi chỉ chọn một tháng. Bấm điểm doanh số để chọn một tháng. Dữ liệu tổng kỳ không có breakdown tháng sẽ khóa chọn tháng và Growth hiện N/A.
+- Template Pilot tải xuống dạng XLSX để Excel mở mỗi trường thành một cột.
 - Tìm kiếm và sắp xếp Category Overview theo Category, doanh số, Growth, Profit hoặc Stockday; SKU Detail tìm kiếm và lọc theo Category, ABC, Growth, Margin, Price, Stockday hoặc Status.
 - Theme Pilot lưu trong `sku-pilot-theme`, tách khỏi `sku-theme` của web cũ; hai entry point dùng chung token sáng/tối.
 - Phần tồn kho hiển thị phân bố Stockday và Sales Motion theo ngành hàng, sau đó là Category Overview.
