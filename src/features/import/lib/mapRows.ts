@@ -39,6 +39,7 @@ export function mapRows(json: Record<string, unknown>[]): SkuInput[] {
       category: map.has('category') ? String(get(row, 'category') ?? '').trim() || 'Khác' : 'Chung',
       subcat1: String(get(row, 'subcat1') ?? '').trim(),
       subcat2: String(get(row, 'subcat2') ?? '').trim(),
+      storeType: String(get(row, 'storeType') ?? '').trim(),
       revenue: parseNum(get(row, 'revenue')),
       revenuePrev: parseNum(get(row, 'revenuePrev')),
       gp: parseNum(get(row, 'gp')),
@@ -48,7 +49,11 @@ export function mapRows(json: Record<string, unknown>[]): SkuInput[] {
       stock: parseNum(get(row, 'stock')),
       lifecycle: parseLifecycle(get(row, 'lifecycle')),
       seasonal: parseBool(get(row, 'seasonal')),
-      days: parseNum(get(row, 'days'))
+      days: parseNum(get(row, 'days')),
+      inStockDays: parseNum(get(row, 'inStockDays')) || undefined,
+      notDisplayedDays: parseNum(get(row, 'notDisplayedDays')) || undefined,
+      weeklyUnits: String(get(row, 'weeklyUnits') ?? '').split(/[,;|]/).map((v) => parseNum(v)).filter((v) => Number.isFinite(v)),
+      promotion: parseBool(get(row, 'promotion'))
     }))
     .filter((r) => r.sku);
 

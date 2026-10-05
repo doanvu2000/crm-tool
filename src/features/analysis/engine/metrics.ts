@@ -6,14 +6,15 @@ export function computeBaseMetrics(r: SkuInput, periodDays: number): BaseMetrics
   const days = r.days > 0 ? r.days : periodDays;
   const oosDays = Math.min(Math.max(r.oosDays, 0), days);
   const sellingDays = days - oosDays;
-  const ads = sellingDays > 0 ? r.units / sellingDays : 0;
+  const availableDays = Math.max(0, (r.inStockDays ?? sellingDays) - Math.max(0, r.notDisplayedDays ?? 0));
+  const ads = availableDays > 0 ? r.units / availableDays : 0;
   const oosRate = days > 0 ? oosDays / days : 0;
   const expectedDemand = ads * days;
   // Severe OOS: số bán thực không phản ánh nhu cầu, so kỳ trước bằng nhu cầu dự kiến.
   const demandBase = oosRate > THRESHOLDS.oos.critical ? expectedDemand : r.units;
   const growth = r.unitsPrev > 0 ? (demandBase - r.unitsPrev) / r.unitsPrev : null;
   const dos = ads > 0 ? r.stock / ads : r.stock > 0 ? Infinity : null;
-  return { days, sellingDays, ads, oosRate, expectedDemand, growth, dos, ...comparePrevious(r) };
+  return { days, sellingDays, availableDays, ads, oosRate, expectedDemand, growth, dos, ...comparePrevious(r) };
 }
 
 export function comparePrevious(r: SkuInput) {

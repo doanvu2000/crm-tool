@@ -14,6 +14,7 @@ export const COLUMNS: ColumnSpec[] = [
   { key: 'category', label: 'Ngành hàng', aliases: ['category', 'nganh', 'nganhhang', 'danhmuc', 'cat'] },
   { key: 'subcat1', label: 'Subcat 1 (ngành hàng con)', aliases: ['subcat1', 'subcategory1', 'sub1', 'nganhhangcon1', 'nganhhangconcap1', 'danhmuccon1', 'danhmucconcap1'] },
   { key: 'subcat2', label: 'Subcat 2 (ngành hàng con cấp 2)', aliases: ['subcat2', 'subcategory2', 'sub2', 'nganhhangcon2', 'nganhhangconcap2', 'danhmuccon2', 'danhmucconcap2'] },
+  { key: 'storeType', label: 'Loại cửa hàng', aliases: ['storetype', 'storeformat', 'lo cuahang', 'loaicuahang', 'format'] },
   { key: 'revenue', label: 'Doanh thu kỳ hiện tại', required: true, aliases: ['revenue', 'doanhthu', 'sales', 'doanhso'] },
   { key: 'revenuePrev', label: 'Doanh thu kỳ trước (thiếu thì ước tính theo giá kỳ này)', aliases: ['revenueprev', 'prevrevenue', 'revenueprevious', 'doanhthukytruoc', 'dtkytruoc', 'doanhthucungky', 'salesprev', 'prevsales'] },
   { key: 'gp', label: 'Lợi nhuận gộp', aliases: ['gp', 'grossprofit', 'loinhuangop', 'lngop', 'laigop'] },
@@ -24,6 +25,10 @@ export const COLUMNS: ColumnSpec[] = [
   { key: 'lifecycle', label: 'Lifecycle: New / Active / EOL', aliases: ['lifecycle', 'vongdoi', 'trangthai', 'status'] },
   { key: 'seasonal', label: 'Hàng mùa vụ: Y / N', aliases: ['seasonal', 'muavu', 'theomua', 'season'] },
   { key: 'days', label: 'Số ngày của kỳ (nếu khác kỳ chung)', aliases: ['days', 'totaldays', 'songay', 'kyngay'] }
+  ,{ key: 'inStockDays', label: 'Số ngày thực sự có hàng', aliases: ['instockdays', 'availabledays', 'ngaycohang', 'songaycohang'] }
+  ,{ key: 'notDisplayedDays', label: 'Số ngày chưa bày bán', aliases: ['notdisplayeddays', 'notondisplaydays', 'ngaychuabay', 'ngaychuabayban'] }
+  ,{ key: 'weeklyUnits', label: 'Số lượng bán theo tuần', aliases: ['weeklyunits', 'unitsbyweek', 'salesbyweek', 'soluongtheotuan'] }
+  ,{ key: 'promotion', label: 'Hàng khuyến mại: Y / N', aliases: ['promotion', 'promo', 'khuyenmai'] }
 ];
 
-export const TEMPLATE_HEADER = ['sku', 'name', 'category', 'subcat1', 'subcat2', 'revenue', 'revenue_prev', 'gp', 'units', 'units_prev', 'oos_days', 'stock', 'lifecycle', 'seasonal'];
+export const TEMPLATE_HEADER = ['sku', 'name', 'category', 'subcat1', 'subcat2', 'store_type', 'revenue', 'revenue_prev', 'gp', 'units', 'units_prev', 'oos_days', 'stock', 'lifecycle', 'seasonal', 'days', 'in_stock_days', 'not_displayed_days', 'weekly_units', 'promotion'];

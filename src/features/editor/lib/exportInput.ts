@@ -7,7 +7,7 @@ export function exportInputCsv(rows: readonly SkuInput[], filename = 'sku_input_
   downloadCsv(filename, [
     HEADER,
     ...rows.map((r) => [
-      r.sku, r.name, r.category, r.subcat1 ?? '', r.subcat2 ?? '', r.revenue, r.revenuePrev, r.gp, r.units, r.unitsPrev, r.oosDays, r.stock, r.lifecycle, r.seasonal ? 'Y' : 'N', r.days || ''
+    r.sku, r.name, r.category, r.subcat1 ?? '', r.subcat2 ?? '', r.storeType ?? '', r.revenue, r.revenuePrev, r.gp, r.units, r.unitsPrev, r.oosDays, r.stock, r.lifecycle, r.seasonal ? 'Y' : 'N', r.days || '', r.inStockDays ?? '', r.notDisplayedDays ?? '', (r.weeklyUnits ?? []).join('|'), r.promotion ? 'Y' : 'N'
     ])
   ]);
 }

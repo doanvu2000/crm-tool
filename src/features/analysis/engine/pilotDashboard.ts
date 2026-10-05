@@ -1,4 +1,5 @@
 import { PILOT_THRESHOLDS as T } from '../model/thresholds';
+import { salesMotion } from './classify';
 import type { PilotSkuInput, PilotSkuResult, PilotSkuStatus } from '../model/types';
 
 /** Pure selected-period dashboard calculation. It reports measures and status only. */
@@ -20,6 +21,7 @@ export function analyzePilotSkus(rows: readonly PilotSkuInput[], selectedMonths:
   }
 
   const totalSales = rows.reduce((total, row) => total + selectedRevenue(row), 0);
+  const motionRows = rows.map((row) => ({ ...row, units: selectedQty(row), oosDays: 0, days: periodDays, lifecycle: row.lifecycle ?? 'Active' as const, seasonal: row.seasonal ?? false }));
   const ranked = [...rows].map((row) => ({ row, sales3m: selectedRevenue(row), totalQty3m: selectedQty(row), selectedProfit: selectedProfit(row) }))
     .sort((a, b) => b.sales3m - a.sales3m);
   let cumulative = 0;
@@ -60,10 +62,12 @@ export function analyzePilotSkus(rows: readonly PilotSkuInput[], selectedMonths:
     else if ((abc === 'A' || abc === 'B') && growth != null && growth < T.status.declineCeiling) status = 'DECLINE';
     else if (abc === 'C' && growth != null && growth < T.status.slowExcessGrowthCeiling && stockDays != null && stockDays > T.status.overstockStockDaysFloor) status = 'SLOW / EXCESS';
 
+    const motion = salesMotion({ ...row, units: totalQty3m, oosDays: 0, days: periodDays, lifecycle: row.lifecycle ?? 'Active', seasonal: row.seasonal ?? false }, motionRows, periodDays);
     return {
       ...row, sales3m, totalQty3m, salesShare, cumulativeSalesShare: cumulative, abc,
       growth, growthStatus, margin, categoryMargin, marginIndex, marginStatus, asp, priceIndex, priceSegment,
-      averageDailySales, stockDays, stockDayStatus, status
+      averageDailySales, stockDays, stockDayStatus, status,
+      salesMotion: motion.motion, nonMovingThresholdDays: motion.thresholdDays, weeklySalesEven: motion.weeklyEven
     };
   });
 }

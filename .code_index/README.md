@@ -15,4 +15,4 @@ Bản đồ kiến trúc gọn để đọc trước khi sửa code. Đọc theo
 - Đổi ngưỡng / rule nghiệp vụ → cập nhật `features/analysis.md` (mục Rules).
 - Không chép code vào index; chỉ ghi đường dẫn, trách nhiệm, quan hệ.
 
-Cập nhật lần cuối: 2026-10-01 (đổi thứ tự DIO và DOS trong Pilot).
+Cập nhật lần cuối: 2026-10-05 (thêm sales motion Fast/Slow/Non-moving và box phân bố theo ngành hàng trong Pilot).

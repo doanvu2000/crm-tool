@@ -97,6 +97,23 @@ describe('analyzeSkus', () => {
     expect(r.dos).toBe(Infinity);
     expect(r.group).toBe('Stop PO / Xả hàng');
   });
+
+  it('phân loại Fast theo top 25% peer và yêu cầu bán đều từng tuần', () => {
+    const rows = analyzeSkus([
+      sku({ sku: 'fast', storeType: 'Mini', subcat1: 'Nước', units: 280, days: 28, weeklyUnits: [70, 70, 70, 70] }),
+      sku({ sku: 'slow-1', storeType: 'Mini', subcat1: 'Nước', units: 56, days: 28, weeklyUnits: [56, 0, 0, 0] }),
+      sku({ sku: 'slow-2', storeType: 'Mini', subcat1: 'Nước', units: 70, days: 28, weeklyUnits: [18, 17, 18, 17] }),
+      sku({ sku: 'slow-3', storeType: 'Mini', subcat1: 'Nước', units: 84, days: 28, weeklyUnits: [21, 21, 21, 21] })
+    ], DEFAULT_SETTINGS);
+    expect(rows.find((r) => r.sku === 'fast')?.salesMotion).toBe('Fast');
+    expect(rows.find((r) => r.sku === 'slow-1')?.salesMotion).toBe('Slow');
+  });
+
+  it('gắn cờ Non-moving theo số ngày thực sự có hàng và bỏ ngày chưa bày bán', () => {
+    const [row] = analyzeSkus([sku({ category: 'Đồ uống bảo quản lạnh', units: 0, days: 30, inStockDays: 20, notDisplayedDays: 5 })], DEFAULT_SETTINGS);
+    expect(row.nonMovingThresholdDays).toBe(14);
+    expect(row.salesMotion).toBe('Non-moving');
+  });
 });
 
 describe('lọc ngành hàng', () => {

@@ -106,7 +106,7 @@ const sub = 'text-xs text-ink-3';
         </div>
         <p class="mt-0.5 text-xs leading-snug text-ink-3">{{ r.reasons.join(' · ') }}</p>
         <dl class="mt-2.5 grid grid-cols-4 gap-2 border-t border-line pt-2.5 text-xs">
-          <div><dt class="text-ink-3">ADS</dt><dd class="num text-ink">{{ fmt1(r.ads) }}</dd></div>
+          <div><dt class="text-ink-3">ADS</dt><dd class="num text-ink">{{ fmt1(r.ads) }}<span class="block font-sans text-[10px]">{{ r.salesMotion }}</span></dd></div>
           <div><dt class="text-ink-3">DOS</dt><dd class="num text-ink">{{ r.dos === Infinity ? '∞' : fmt1(r.dos) }}</dd></div>
           <div><dt class="text-ink-3">OOS</dt><dd class="num text-ink">{{ pct(r.oosRate, 0) }}</dd></div>
           <div><dt class="text-ink-3">Growth</dt><dd class="num text-ink">{{ pct(r.growth, 0) }}</dd></div>
@@ -146,7 +146,7 @@ const sub = 'text-xs text-ink-3';
             </td>
             <td :class="cell"><span class="pill"><ColorDot :color="abcColor(r)" />{{ r.abc }}</span></td>
             <td :class="numCell" :title="`Kỳ trước ${money(r.prevRevenue)}${r.prevRevenueEstimated ? ' (ước tính)' : ''}`">{{ money(r.revenue) }}<div :class="[sub, 'font-sans']">{{ signedPct(r.revenueGrowth, 0) }} kỳ trước</div></td>
-            <td :class="numCell">{{ fmt1(r.ads) }}<div :class="[sub, 'font-sans']">{{ r.velocity }}</div></td>
+            <td :class="numCell">{{ fmt1(r.ads) }}<div :class="[sub, 'font-sans']">{{ r.velocity }} · {{ r.salesMotion }}</div></td>
             <td :class="numCell">{{ pct(r.adsIndex, 0) }}</td>
             <td :class="numCell">{{ fmt0(r.stock) }}</td>
             <td :class="numCell">{{ r.dos === Infinity ? '∞' : fmt1(r.dos) }}<div :class="[sub, 'font-sans']">{{ r.dosStatus }}</div></td>

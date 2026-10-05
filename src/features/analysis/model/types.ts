@@ -17,6 +17,7 @@ export type ActionGroup = (typeof ACTION_GROUPS)[number];
 export type Lifecycle = (typeof LIFECYCLES)[number];
 
 export type VelocityBasis = 'ads' | 'index';
+export type SalesMotion = 'Fast' | 'Slow' | 'Non-moving' | 'Unknown';
 
 /** 1 dòng dữ liệu đầu vào = 1 SKU trong 1 kỳ. */
 export interface SkuInput {
@@ -36,6 +37,11 @@ export interface SkuInput {
   seasonal: boolean;
   /** 0 = dùng kỳ chung trong settings. */
   days: number;
+  storeType?: string;
+  inStockDays?: number;
+  notDisplayedDays?: number;
+  weeklyUnits?: number[];
+  promotion?: boolean;
 }
 
 export interface AnalysisSettings {
@@ -49,6 +55,7 @@ export interface AnalysisSettings {
 export interface BaseMetrics {
   days: number;
   sellingDays: number;
+  availableDays: number;
   ads: number;
   oosRate: number;
   expectedDemand: number;
@@ -80,6 +87,9 @@ export interface Classification {
   trend: Trend;
   isNew: boolean;
   isCore: boolean;
+  salesMotion: SalesMotion;
+  nonMovingThresholdDays: number | null;
+  weeklySalesEven: boolean | null;
 }
 
 export interface ActionDecision {
@@ -105,6 +115,15 @@ export interface PilotSkuInput {
   sellingPrice: number;
   inventoryQty: number;
   inventoryValue: number;
+  subcat1?: string;
+  subcat2?: string;
+  storeType?: string;
+  inStockDays?: number;
+  notDisplayedDays?: number;
+  weeklyUnits?: number[];
+  promotion?: boolean;
+  lifecycle?: Lifecycle;
+  seasonal?: boolean;
 }
 
 export type PilotAbc = 'A' | 'B' | 'C';
@@ -133,4 +152,7 @@ export interface PilotSkuResult extends PilotSkuInput {
   stockDays: number | null;
   stockDayStatus: PilotStockDayStatus;
   status: PilotSkuStatus;
+  salesMotion: SalesMotion;
+  nonMovingThresholdDays: number | null;
+  weeklySalesEven: boolean | null;
 }

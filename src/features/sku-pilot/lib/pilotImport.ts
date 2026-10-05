@@ -5,6 +5,15 @@ const fields = {
   sku: ['sku', 'masp', 'masku', 'itemcode', 'productcode'],
   name: ['name', 'productname', 'tensanpham', 'product'],
   category: ['category', 'nganhhang', 'nganh', 'danhmuc'],
+  subcat1: ['subcat1', 'subcategory1', 'nganhhangcon1'],
+  subcat2: ['subcat2', 'subcategory2', 'nganhhangcon2'],
+  storeType: ['storetype', 'storeformat', 'loaicuahang', 'format'],
+  inStockDays: ['instockdays', 'availabledays', 'ngaycohang'],
+  notDisplayedDays: ['notdisplayeddays', 'ngaychuabay'],
+  weeklyUnits: ['weeklyunits', 'unitsbyweek', 'soluongtheotuan'],
+  promotion: ['promotion', 'promo', 'khuyenmai'],
+  lifecycle: ['lifecycle', 'vongdoisanpham'],
+  seasonal: ['seasonal', 'muavu'],
   sellingPrice: ['sellingprice', 'giaban', 'asp', 'averageprice'],
   inventoryQty: ['inventoryqty', 'endingstockqty', 'stock', 'tonkho', 'soluongton'],
   inventoryValue: ['inventoryvalue', 'endinginventoryvalue', 'tonkhogiatri', 'giatritonkho']
@@ -39,6 +48,8 @@ export function mapPilotRows(rows: Record<string, unknown>[]): PilotSkuInput[] {
     const aggregateQty = find(row, ['salesqty3m', 'salesqty', 'units', 'soluongban']);
     const aggregateRevenue = find(row, ['revenue3m', 'revenue', 'doanhthu', 'salesvalue']);
     const aggregateProfit = find(row, ['profit3m', 'profit', 'grossprofit', 'loinhuangop']);
+    const lifecycleValue = String(find(row, fields.lifecycle) ?? '').trim().toLowerCase();
+    const inStockDaysValue = find(row, fields.inStockDays);
     const salesQty = (monthlyAvailable ? monthQty : [undefined, undefined, aggregateQty]).map(parseNum) as [number, number, number];
     const revenue = (monthlyAvailable ? monthRevenue : [undefined, undefined, aggregateRevenue]).map(parseNum) as [number, number, number];
     const profit = (monthProfit.some((v) => v !== undefined) ? monthProfit : [undefined, undefined, aggregateProfit]).map(parseNum) as [number, number, number];
@@ -46,13 +57,22 @@ export function mapPilotRows(rows: Record<string, unknown>[]): PilotSkuInput[] {
       sku,
       name: String(find(row, fields.name) ?? '').trim() || sku,
       category: String(find(row, fields.category) ?? '').trim() || 'Chưa phân ngành',
+      subcat1: String(find(row, fields.subcat1) ?? '').trim(),
+      subcat2: String(find(row, fields.subcat2) ?? '').trim(),
+      storeType: String(find(row, fields.storeType) ?? '').trim(),
       salesQty,
       revenue,
       profit,
       monthlyAvailable,
       sellingPrice: parseNum(find(row, fields.sellingPrice)),
       inventoryQty: parseNum(find(row, fields.inventoryQty)),
-      inventoryValue: parseNum(find(row, fields.inventoryValue))
+      inventoryValue: parseNum(find(row, fields.inventoryValue)),
+      inStockDays: inStockDaysValue == null || inStockDaysValue === '' ? undefined : Math.max(0, parseNum(inStockDaysValue)),
+      notDisplayedDays: parseNum(find(row, fields.notDisplayedDays)) || undefined,
+      weeklyUnits: String(find(row, fields.weeklyUnits) ?? '').split(/[,;|]/).map((v) => parseNum(v)).filter((v) => Number.isFinite(v)),
+      promotion: ['y', 'yes', 'true', '1'].includes(String(find(row, fields.promotion) ?? '').trim().toLowerCase()),
+      lifecycle: lifecycleValue.startsWith('new') ? 'New' : ['eol', 'terminate', 'plan to terminate'].includes(lifecycleValue) ? 'EOL' : lifecycleValue ? 'Active' : undefined,
+      seasonal: ['y', 'yes', 'true', '1'].includes(String(find(row, fields.seasonal) ?? '').trim().toLowerCase())
     });
   }
   if (mapped.length === 0) throw new Error('Không tìm thấy dòng có mã SKU. Kiểm tra lại tên cột SKU.');
@@ -63,7 +83,7 @@ export function downloadPilotTemplate() {
   const header = [
     'sku', 'name', 'category', 'sales_qty_m1', 'sales_qty_m2', 'sales_qty_m3',
     'revenue_m1', 'revenue_m2', 'revenue_m3', 'profit_m1', 'profit_m2', 'profit_m3',
-    'selling_price', 'inventory_qty', 'inventory_value'
+    'selling_price', 'inventory_qty', 'inventory_value', 'subcat1', 'subcat2', 'store_type', 'in_stock_days', 'not_displayed_days', 'weekly_units', 'lifecycle', 'seasonal', 'promotion'
   ];
   const blob = new Blob([`\uFEFF${header.join(',')}\n`], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);

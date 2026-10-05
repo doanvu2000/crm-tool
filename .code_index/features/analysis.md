@@ -6,12 +6,12 @@ Trái tim nghiệp vụ. Engine thuần TS + Pinia store. Public API: `features/
 
 | File | Trách nhiệm |
 |---|---|
-| `model/types.ts` | Hằng thứ tự (`ABC_CLASSES`, `VELOCITY_LEVELS`, `DOS_LEVELS`, `OOS_LEVELS`, `TREND_LEVELS`, `ACTION_GROUPS`, `LIFECYCLES`) + type `SkuInput` (có `category`, `subcat1?`, `subcat2?`), `AnalysisSettings`, kết quả engine cũ và `PilotSkuInput`/`PilotSkuResult` (Margin, Margin trung bình Category và Stockday) cho dashboard 3 tháng |
+| `model/types.ts` | Hằng thứ tự (`ABC_CLASSES`, `VELOCITY_LEVELS`, `DOS_LEVELS`, `OOS_LEVELS`, `TREND_LEVELS`, `ACTION_GROUPS`, `LIFECYCLES`) + type `SkuInput` (có `category`, `subcat1?`, `subcat2?`, store type, ngày có hàng/chưa bày và số bán theo tuần), `AnalysisSettings`, kết quả engine cũ và `PilotSkuInput`/`PilotSkuResult` (Margin, Margin trung bình Category, Stockday và Fast/Slow/Non-moving) cho dashboard 3 tháng |
 | `model/actionRules.ts` | `ACTION_RULES` (id, stage, when, group, action) theo đúng thứ tự xét, `ActionRuleId`, `ACTION_RULE_BY_ID`. `decideAction` lấy group/action từ đây nên bảng Quy tắc luôn khớp engine |
-| `model/thresholds.ts` | `THRESHOLDS` và `DEFAULT_SETTINGS` ABC CVS (56 ngày, A 70%, B 90%), `PILOT_THRESHOLDS` riêng cho dashboard `/pilot` theo Lark (ABC 80/95%, Growth, Margin Index, Price Index, Stockday), `sanitizeSettings` |
-| `engine/metrics.ts` | `computeBaseMetrics`, `comparePrevious`, `categoryAverageAds` |
+| `model/thresholds.ts` | `THRESHOLDS` và `DEFAULT_SETTINGS` ABC CVS (56 ngày, A 70%, B 90%), `PILOT_THRESHOLDS` riêng cho dashboard `/pilot` theo Lark (ABC 80/95%, Growth, Margin Index, Price Index, Stockday), `SALES_MOTION_THRESHOLDS` và `NON_MOVING_THRESHOLDS` theo ngành Ohmee, `sanitizeSettings` |
+| `engine/metrics.ts` | `computeBaseMetrics`, `comparePrevious`, `categoryAverageAds`; ADS dùng số ngày thực sự có hàng sau khi loại ngày chưa bày |
 | `engine/abc.ts` | `salesValue`, `assignAbc`, `assignAbcByCategory` (Pareto theo Sales riêng từng ngành) |
-| `engine/classify.ts` | `velocityByAds`, `velocityByIndex`, `dosStatus`, `oosStatus`, `trendStatus`, `isCoreSku` |
+| `engine/classify.ts` | `velocityByAds`, `velocityByIndex`, `dosStatus`, `oosStatus`, `trendStatus`, `isCoreSku`, `salesMotion`, `nonMovingThresholdDays`, `weeklySalesEven` |
 | `engine/actions.ts` | `decideAction` (rule engine), trả `rule` id + group + action + reasons |
 | `engine/analyze.ts` | `analyzeSkus` pipeline |
 | `engine/pilotDashboard.ts` | `analyzePilotSkus(rows, selectedMonths?)`: tính ABC, Growth giữa hai tháng chọn cuối hoặc giữa tháng chọn duy nhất và tháng liền trước, Margin, Price, Stockday theo số ngày kỳ chọn và nhãn Status; không tính DIO hoặc Action |
@@ -28,13 +28,14 @@ Trái tim nghiệp vụ. Engine thuần TS + Pinia store. Public API: `features/
 - ABC xác định mức ưu tiên quản lý: A Phải có, B Nên có, C Cân nhắc có. Business rule mới quyết định action cuối cùng; C không tự động là delist.
 - Velocity ADS: ≥20 Fast, ≥15 Normal, >5 Slow, còn lại Very Slow (ngưỡng liên tục, lấp khe 5-6, 14-15, 19-20 của tài liệu).
 - Velocity Index: ≥100% Fast, ≥70% Normal, ≥30% Slow.
+- Sales motion mới: Fast là top 25% ADS trong cùng ngành hàng con + loại cửa hàng (ít nhất 4 SKU đối chiếu); khi có dữ liệu tuần thì mọi tuần phải có bán. Nếu không có dữ liệu tuần, xếp theo tốc độ tương đối và không khẳng định độ đều. Có bán nhưng không đạt điều kiện là Slow. Non-moving là không bán đủ ngưỡng ngày có hàng theo `NON_MOVING_THRESHOLDS`; ngày OOS và ngày chưa bày bán bị loại khỏi mẫu số. New/Seasonal/Promotion và nhóm thiếu dữ liệu đối chiếu trả Unknown.
 - Core: A + ADS ≥ 20 + Index ≥ 70% + OOS ≤ 10% + không EOL.
 - DOS: ≤7, ≤15, ≤30, ≤60, ≤90, >90. ADS = 0 và còn tồn → Infinity (Overstock); không tồn → N/A.
 - OOS > 20%: Growth so kỳ trước bằng nhu cầu dự kiến (ADS x days).
 - Kỳ trước: prevRevenue = revenuePrev, thiếu (≤ 0) mà có unitsPrev thì = unitsPrev x giá kỳ này (`prevRevenueEstimated`).
   volumeEffect = (units - unitsPrev) x giá kỳ trước; priceEffect = revenueDelta - volumeEffect. Ước tính thì priceEffect = 0.
 - isNew = lifecycle New hoặc (unitsPrev = 0 và units > 0).
-- Thứ tự Action: EOL → New → Seasonal → Severe OOS → switch DOS (N/A, Critical Low, Low, Overstock, Excess, High, Healthy).
+- Thứ tự Action: EOL → New → Seasonal → Severe OOS → switch DOS (N/A, Critical Low, Low, Overstock, Excess, High, Healthy). Sales motion chỉ là cờ phân tích, không tự động Stop PO/Delist.
 - Nhóm Action: Tăng PO, Duy trì, Giảm PO, Stop PO / Xả hàng, Review. Mỗi nhánh trả `reasons[]`.
 
 Dashboard Pilot có hồ sơ ngưỡng riêng `PILOT_THRESHOLDS`, theo tài liệu Lark ABC Analysis & SKU Review. Các ngưỡng này không đổi chuẩn ABC CVS của ứng dụng hiện tại. Chi tiết luồng ở `features/sku-pilot.md`.

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { ACTION_GROUPS, ACTION_RULES, THRESHOLDS as T, useAnalysisStore, type AnalysisSettings } from '@/features/analysis';
+import { ACTION_GROUPS, ACTION_RULES, NON_MOVING_THRESHOLDS, THRESHOLDS as T, useAnalysisStore, type AnalysisSettings } from '@/features/analysis';
 import { usePalette } from '@/shared/composables/usePalette';
 import { fmt0, pct } from '@/shared/lib/format';
 import ColorDot from '@/shared/ui/ColorDot.vue';
@@ -23,6 +23,7 @@ const rules = computed(() => {
     { title: 'OOS', text: `OOS Days / Total Days. ${oosRule()} Severe OOS: Growth dùng nhu cầu dự kiến = ADS x số ngày của kỳ.` },
     { title: 'Growth', text: `(Kỳ hiện tại - kỳ trước) / kỳ trước. ${trendRule()}` },
     { title: 'So với kỳ trước', text: compareRule() },
+    { title: 'Fast / Slow / Non-moving', text: 'Fast = top 25% ADS trong cùng ngành hàng con và loại cửa hàng, đồng thời mọi tuần có dữ liệu đều có bán. Slow = có bán nhưng không đạt Fast. Non-moving = không bán trong số ngày thực sự có hàng đạt ngưỡng ngành hàng; ngày OOS và ngày chưa bày bán không tính. Ngưỡng mặc định: ' + Object.entries(NON_MOVING_THRESHOLDS).map(([name, days]) => `${name} ${days} ngày`).join('; ') + '.' },
     { title: 'New SKU', text: `Lifecycle = New, hoặc kỳ trước không bán mà kỳ này có bán. Bổ sung khi DOS ≤ ${T.newSkuReplenishMaxDos}, còn lại theo dõi.` }
   ];
 });

@@ -4,7 +4,7 @@
 File .csv/.xlsx ─┐
                  ├─ import/lib/readSheet.ts (SheetJS lazy) → Record<string, unknown>[]
 Dữ liệu mẫu ─────┤─ import/lib/sampleData.ts
-                 └─ import/lib/mapRows.ts (alias cột, parseNum VN/EN) → SkuInput[] (category + subcat1 + subcat2)
+                 └─ import/lib/mapRows.ts (alias cột, parseNum VN/EN) → SkuInput[] (category + subcat1 + subcat2 + storeType + ngày có hàng/chưa bày + tuần bán)
                         │
                         ▼
         analysis/store/analysisStore.ts  (Pinia)
@@ -20,11 +20,11 @@ Dữ liệu mẫu ─────┤─ import/lib/sampleData.ts
                         │
                         ▼
         analysis/engine/analyze.ts
-          1. metrics.ts   computeBaseMetrics: days, sellingDays, ADS, OOS rate, expectedDemand, growth, DOS
+          1. metrics.ts   computeBaseMetrics: days, sellingDays, availableDays, ADS, OOS rate, expectedDemand, growth, DOS
                           + comparePrevious: prevRevenue, revenueDelta/Growth, unitsDelta/Change, volumeEffect, priceEffect
           2. metrics.ts   categoryAverageAds → ADS Index
           3. abc.ts       assignAbcByCategory (Pareto Sales, xếp độc lập trong từng ngành hàng)
-          4. classify.ts  velocity, dosStatus, oosStatus, trendStatus, isCoreSku, isNew
+          4. classify.ts  velocity, salesMotion Fast/Slow/Non-moving, dosStatus, oosStatus, trendStatus, isCoreSku, isNew
           5. actions.ts   decideAction → group, action, reasons[]
                         │
                         ▼  SkuResult[] (xếp theo rank ABC)
@@ -52,8 +52,8 @@ Dashboard Pilot là website tĩnh riêng tại `/pilot.html`; không dùng store
 ```
 CSV/XLS/XLSX hoặc dữ liệu mẫu
   → import/readSheet → sku-pilot/lib/pilotImport → PilotSkuInput[]
-  → selectedMonths → analysis/engine/pilotDashboard (ABC → Growth → Margin → Price → Stockday → Status)
-  → filter chung / lọc chéo từ chart và bảng → KPI, biểu đồ, Category Overview tìm/sắp xếp, SKU Detail lọc/phân trang
+  → selectedMonths → analysis/engine/pilotDashboard (ABC → Growth → Margin → Price → Stockday → Fast/Slow/Non-moving → Status)
+  → filter chung / lọc chéo từ chart và bảng → KPI, biểu đồ, box Sales Motion tổng hợp Fast/Slow/Non-moving theo ngành hàng, Category Overview tìm/sắp xếp, SKU Detail lọc/phân trang
   ↔ IndexedDB crm-tool-sku-pilot/workspace/latest
 ```
 

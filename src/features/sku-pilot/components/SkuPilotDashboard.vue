@@ -12,7 +12,7 @@ import { generatePilotSample } from '../lib/sampleData';
 import { loadPilotData, savePilotData } from '../lib/pilotPersistence';
 import { usePilotTheme } from '../composables/usePilotTheme';
 
-type FilterKey = 'sku' | 'category' | 'abc' | 'growthStatus' | 'marginStatus' | 'priceSegment' | 'stockDayStatus' | 'status' | 'sales3m' | 'growth' | 'margin' | 'marginIndex' | 'priceIndex' | 'stockDays';
+type FilterKey = 'sku' | 'category' | 'abc' | 'growthStatus' | 'marginStatus' | 'priceSegment' | 'stockDayStatus' | 'salesMotion' | 'status' | 'sales3m' | 'growth' | 'margin' | 'marginIndex' | 'priceIndex' | 'stockDays';
 type CrossFilter = { key: FilterKey; value: string } | null;
 const monthLabels = ['M1', 'M2', 'M3'];
 const growthLabels = ['Strong Growth', 'Growth', 'Stable', 'Decline', 'Sharp Decline', 'N/A'];
@@ -20,6 +20,8 @@ const growthNames = ['Tăng mạnh', 'Tăng', 'Ổn định', 'Giảm', 'Giảm 
 const stockDayLabels = ['Very Low Stock', 'Low Stock', 'Healthy Stock', 'High Stock', 'Overstock', 'N/A'];
 const stockDayNames = ['≤7 ngày', '8–15 ngày', '16–30 ngày', '31–60 ngày', '>60 ngày', 'Chưa có Stockday'];
 const priceLabels = ['Premium', 'Mid-High', 'Mid-Low', 'Entry', 'N/A'];
+const salesMotionLabels = ['Fast', 'Slow', 'Non-moving', 'Unknown'] as const;
+const salesMotionNames = ['Fast', 'Slow', 'Non-moving', 'Chưa phân loại'];
 const statuses = ['CORE', 'GROWTH AT RISK', 'CORE / OVERSTOCK', 'SALES DRIVER / LOW MARGIN', 'DECLINE', 'SLOW / EXCESS', 'Regular'];
 const rows = shallowRef<PilotSkuInput[]>([]);
 const source = ref('Dữ liệu mẫu Pilot');
@@ -44,7 +46,7 @@ const analyzed = computed(() => analyzePilotSkus(rows.value, selectedMonths.valu
 const categories = computed(() => [...new Set(analyzed.value.map((row) => row.category))].sort((a, b) => a.localeCompare(b, 'vi')));
 const activeFilterText = computed(() => {
   if (!crossFilter.value) return '';
-  const names: Record<FilterKey, string> = { sku: 'SKU', category: 'Category', abc: 'ABC', growthStatus: 'Tăng trưởng', marginStatus: 'Margin', priceSegment: 'Price Index', stockDayStatus: 'Stockday', status: 'Trạng thái', sales3m: 'Doanh số', growth: 'Growth', margin: 'Margin', marginIndex: 'Margin Index', priceIndex: 'Price Index', stockDays: 'Stockday' };
+  const names: Record<FilterKey, string> = { sku: 'SKU', category: 'Category', abc: 'ABC', growthStatus: 'Tăng trưởng', marginStatus: 'Margin', priceSegment: 'Price Index', stockDayStatus: 'Stockday', salesMotion: 'Fast / Slow / Non-moving', status: 'Trạng thái', sales3m: 'Doanh số', growth: 'Growth', margin: 'Margin', marginIndex: 'Margin Index', priceIndex: 'Price Index', stockDays: 'Stockday' };
   return `${names[crossFilter.value.key]}: ${crossFilter.value.value}`;
 });
 const globalRows = computed(() => analyzed.value.filter((row) =>
@@ -78,6 +80,22 @@ const avgStockDays = computed(() => {
   const values = filtered.value.map((row) => row.stockDays).filter((v): v is number => v != null && Number.isFinite(v));
   return values.length ? values.reduce((a, b) => a + b, 0) / values.length : null;
 });
+const salesMotionCounts = computed(() => Object.fromEntries(salesMotionLabels.map((label) => [label, filtered.value.filter((row) => row.salesMotion === label).length])) as Record<(typeof salesMotionLabels)[number], number>);
+const salesMotionByCategory = computed(() => {
+  const groups = new Map<string, { counts: Record<(typeof salesMotionLabels)[number], number>; thresholdDays: Set<number> }>();
+  for (const row of filtered.value) {
+    const group = groups.get(row.category) ?? { counts: { Fast: 0, Slow: 0, 'Non-moving': 0, Unknown: 0 }, thresholdDays: new Set<number>() };
+    group.counts[row.salesMotion] += 1;
+    if (row.nonMovingThresholdDays != null) group.thresholdDays.add(row.nonMovingThresholdDays);
+    groups.set(row.category, group);
+  }
+  return [...groups.entries()].map(([category, group]) => ({ category, counts: group.counts, thresholdDays: [...group.thresholdDays].sort((a, b) => a - b) })).sort((a, b) => a.category.localeCompare(b.category, 'vi'));
+});
+function nonMovingRuleLabel(days: number[]) {
+  if (days.length === 0) return 'Chưa có ngưỡng ngành';
+  if (days.length === 1) return `0 bán trong kỳ + có hàng ≥ ${days[0]} ngày`;
+  return `Ngưỡng theo ngành con: ${days.join(' / ')} ngày`;
+}
 const overallRevenueGrowth = computed(() => {
   const comparison = growthComparisonMonths.value;
   if (!comparison) return null;
@@ -253,6 +271,28 @@ onMounted(async () => {
         <BaseCard title="Đóng góp doanh số ABC" subtitle="Chọn nhóm để lọc các bảng và biểu đồ"><ChartCanvas :config="abcChart" label="Biểu đồ tỷ trọng doanh số theo nhóm ABC" /><div class="mt-2 flex flex-wrap gap-2"><button v-for="key in ['A', 'B', 'C']" :key="key" type="button" class="chip" @click="setCrossFilter('abc', key)">{{ key }} · {{ fmt0(filtered.filter(row => row.abc === key).length) }} SKU</button></div></BaseCard>
         <BaseCard title="Xu hướng doanh số" :subtitle="`Growth ${growthComparisonLabel}`"><ChartCanvas :config="growthChart" label="Biểu đồ số SKU theo nhóm tăng trưởng; bấm cột để lọc" /><div class="mt-2 flex flex-wrap gap-2"><button v-for="(label, index) in growthLabels" :key="label" type="button" class="chip" @click="setCrossFilter('growthStatus', label)">{{ growthNames[index] }} · {{ fmt0(filtered.filter(row => row.growthStatus === label).length) }}</button></div></BaseCard>
         <BaseCard title="Phân khúc giá" subtitle="Price Index = ASP SKU / ASP Category"><ChartCanvas :config="priceChart" label="Biểu đồ số SKU theo phân khúc giá; bấm thanh để lọc" /><div class="mt-2 flex flex-wrap gap-2"><button v-for="key in priceLabels" :key="key" type="button" class="chip" @click="setCrossFilter('priceSegment', key)">{{ key }} · {{ fmt0(filtered.filter(row => row.priceSegment === key).length) }}</button></div></BaseCard>
+        <BaseCard class="lg:col-span-2" title="Fast / Slow / Non-moving theo ngành hàng" subtitle="Fast: top 25% tốc độ bán trong nhóm ngành hàng con và loại cửa hàng, nếu có dữ liệu tuần thì bán đều. Slow: có bán nhưng chưa đạt Fast. Non-moving: không bán trong ngưỡng ngày có hàng của ngành.">
+          <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <button v-for="(label, index) in salesMotionLabels" :key="label" type="button" class="chip flex w-full items-center justify-between gap-2 rounded-xl px-3 text-left" :aria-pressed="crossFilter?.key === 'salesMotion' && crossFilter.value === label" @click="setCrossFilter('salesMotion', label)">
+              <span>{{ salesMotionNames[index] }}</span><span class="num font-semibold text-ink">{{ fmt0(salesMotionCounts[label]) }}</span>
+            </button>
+          </div>
+          <p class="mt-3 text-xs leading-relaxed text-ink-2">Chưa phân loại gồm SKU mới, theo mùa/khuyến mại hoặc chưa đủ số ngày có hàng. File chỉ có tổng theo tháng thì Fast được xếp theo tốc độ tương đối, chưa xác nhận được độ đều theo tuần.</p>
+          <div v-if="salesMotionByCategory.length" class="mt-3 divide-y divide-line rounded-xl border border-line">
+            <div v-for="item in salesMotionByCategory" :key="item.category" class="px-3 py-3">
+              <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                <button type="button" class="break-words text-left text-sm font-medium underline-offset-2 hover:underline" @click="setCrossFilter('category', item.category)">{{ item.category }}</button>
+                <span class="text-xs text-ink-3">{{ nonMovingRuleLabel(item.thresholdDays) }}</span>
+              </div>
+              <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <div v-for="(label, index) in salesMotionLabels" :key="label" class="flex min-h-11 items-center justify-between gap-2 rounded-lg bg-sunken px-3 py-2 text-xs text-ink-2">
+                  <span>{{ salesMotionNames[index] }}</span><span class="num font-semibold text-ink">{{ fmt0(item.counts[label]) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p v-else class="mt-3 rounded-xl bg-sunken px-4 py-6 text-sm text-ink-2">Không có SKU phù hợp với bộ lọc hiện tại.</p>
+        </BaseCard>
       </div>
 
       <div class="mt-4">
@@ -272,10 +312,10 @@ onMounted(async () => {
       <SectionHeader title="SKU Detail" :hint="`${fmt0(filtered.length)} dòng`" />
       <div class="mb-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <label class="w-full"><span class="field-label">Tìm SKU hoặc tên</span><input v-model="search" class="control mt-1" type="search" placeholder="Tìm SKU hoặc tên sản phẩm" /></label>
-        <label class="field-label">Lọc theo trường<select v-model="detailFilterKey" class="control mt-1"><option value="">Không lọc thêm</option><option value="category">Category</option><option value="abc">ABC</option><option value="growthStatus">Tăng trưởng</option><option value="marginStatus">Margin</option><option value="priceSegment">Phân khúc giá</option><option value="stockDayStatus">Stockday</option><option value="status">Trạng thái SKU</option></select></label>
+        <label class="field-label">Lọc theo trường<select v-model="detailFilterKey" class="control mt-1"><option value="">Không lọc thêm</option><option value="category">Category</option><option value="abc">ABC</option><option value="growthStatus">Tăng trưởng</option><option value="marginStatus">Margin</option><option value="priceSegment">Phân khúc giá</option><option value="stockDayStatus">Stockday</option><option value="salesMotion">Fast / Slow / Non-moving</option><option value="status">Trạng thái SKU</option></select></label>
         <label class="field-label sm:col-span-2">Giá trị<select v-model="detailFilterValue" class="control mt-1" :disabled="!detailFilterKey"><option value="">Tất cả giá trị</option><option v-for="value in detailFilterOptions" :key="value" :value="value">{{ value }}</option></select></label>
       </div>
-      <p class="mb-3 text-sm text-ink-2">Bấm Category, ABC, Growth, Margin, phân khúc giá, Stockday hoặc Status trong bảng để lọc toàn dashboard.</p>
+      <p class="mb-3 text-sm text-ink-2">Bấm Category, ABC, Growth, Margin, phân khúc giá, Stockday, Fast / Slow / Non-moving hoặc Status trong bảng để lọc toàn dashboard.</p>
       <div class="overflow-x-auto rounded-2xl border border-line bg-surface"><table class="w-full min-w-[1380px] text-left text-sm">
         <thead class="bg-sunken text-xs text-ink-2"><tr><th class="px-3 py-3">SKU</th><th class="px-3 py-3">Sản phẩm</th><th class="px-3 py-3">Category</th><th class="px-3 py-3">ABC</th><th class="px-3 py-3">Sales {{ selectedMonths.length }}M</th><th class="px-3 py-3">Sales Qty {{ selectedMonths.length }}M</th><th class="px-3 py-3">Growth</th><th class="px-3 py-3">Margin<br><span class="font-normal text-ink-3">Margin TB</span></th><th class="px-3 py-3">Price Index</th><th class="px-3 py-3">Phân khúc</th><th class="px-3 py-3">Stock Qty</th><th class="px-3 py-3">Stock Value</th><th class="px-3 py-3">Stockday</th><th class="px-3 py-3">Status</th></tr></thead>
         <tbody><tr v-for="row in pageRows" :key="row.sku" class="border-t border-line hover:bg-sunken/70">
@@ -284,7 +324,7 @@ onMounted(async () => {
           <td class="px-3 py-3"><button type="button" class="pill font-semibold" @click="setCrossFilter('abc', row.abc)">{{ row.abc }} · {{ pct(row.salesShare) }}</button></td>
           <td class="num px-3 py-3"><button type="button" @click="setCrossFilter('sales3m', String(row.sales3m))">{{ money(row.sales3m) }} ₫</button></td><td class="num px-3 py-3">{{ fmt0(row.totalQty3m) }}</td><td class="num px-3 py-3"><button type="button" class="text-left" @click="setCrossFilter('growthStatus', row.growthStatus)">{{ signedPct(row.growth) }} <span class="text-xs text-ink-3">{{ row.growthStatus }}</span></button></td>
           <td class="num px-3 py-3"><button type="button" class="text-left" @click="setCrossFilter('marginStatus', row.marginStatus)">{{ pct(row.margin) }} <span class="block text-xs text-ink-3">{{ row.marginStatus }}</span><span class="block text-xs text-ink-3">TB ngành: {{ pct(row.categoryMargin) }}</span></button></td><td class="num px-3 py-3"><button type="button" @click="setCrossFilter('priceIndex', String(row.priceIndex ?? 'N/A'))">{{ row.priceIndex == null ? '-' : pct(row.priceIndex) }}</button></td>
-          <td class="px-3 py-3"><button type="button" @click="setCrossFilter('priceSegment', row.priceSegment)">{{ row.priceSegment }}</button></td><td class="num px-3 py-3">{{ fmt0(row.inventoryQty) }}</td><td class="num px-3 py-3">{{ money(row.inventoryValue) }} ₫</td><td class="num px-3 py-3"><button type="button" class="text-left" @click="setCrossFilter('stockDayStatus', row.stockDayStatus)">{{ row.stockDays == null ? '-' : fmt1(row.stockDays) }} ngày <span class="text-xs text-ink-3">{{ row.stockDayStatus }}</span></button></td>
+          <td class="px-3 py-3"><button type="button" @click="setCrossFilter('priceSegment', row.priceSegment)">{{ row.priceSegment }}</button></td><td class="num px-3 py-3">{{ fmt0(row.inventoryQty) }}</td><td class="num px-3 py-3">{{ money(row.inventoryValue) }} ₫</td><td class="num px-3 py-3"><button type="button" class="text-left" @click="setCrossFilter('stockDayStatus', row.stockDayStatus)">{{ row.stockDays == null ? '-' : fmt1(row.stockDays) }} ngày <span class="text-xs text-ink-3">{{ row.stockDayStatus }} · {{ row.salesMotion }}</span></button></td>
           <td class="px-3 py-3"><button type="button" class="pill" @click="setCrossFilter('status', row.status)">{{ row.status }}</button></td>
         </tr><tr v-if="!pageRows.length"><td colspan="14" class="px-4 py-8 text-center text-ink-3">Không có dữ liệu phù hợp.</td></tr></tbody>
       </table></div>
